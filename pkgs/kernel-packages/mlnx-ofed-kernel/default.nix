@@ -4,6 +4,7 @@
   stdenv,
   kernel,
   kernelModuleMakeFlags,
+  mkUnpackScript,
   mlnx-ofed-src,
   writeShellScriptBin,
 
@@ -16,18 +17,11 @@ let
   kernelDir = "${kernel.dev}/lib/modules/${kernelVersion}";
   kernelModuleInstallFlags = [ "INSTALL_MOD_PATH=${placeholder "out"}" ];
 in
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   pname = "mlnx-ofed-kernel";
   inherit (mlnx-ofed-src) src version;
 
-  unpackPhase = ''
-    file=$(find ${mlnx-ofed-src}/SOURCES -name "mlnx-ofed-kernel_*.orig.tar.gz" | head -n1)
-    if [ -z "$file" ]; then
-      echo "Error: Could not find mlnx-ofed-kernel_*.orig.tar.gz in sources"
-      exit 1
-    fi
-    tar --strip-components 1 -xzf "$file"
-  '';
+  unpackPhase = mkUnpackScript pname;
 
   nativeBuildInputs =
     kernel.moduleBuildDependencies

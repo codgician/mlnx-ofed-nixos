@@ -1,9 +1,7 @@
 {
   lib,
   pkgs,
-  kernel,
-  kernelModuleMakeFlags,
-  mlnx-ofed-src,
+  extraArgs ? { },
 }:
 
 lib.makeScope pkgs.newScope (
@@ -11,11 +9,6 @@ lib.makeScope pkgs.newScope (
   lib.pipe ./. [
     builtins.readDir
     (lib.filterAttrs (_: type: type == "directory"))
-    (lib.mapAttrs (
-      name: _:
-      self.callPackage ./${name} {
-        inherit kernel kernelModuleMakeFlags mlnx-ofed-src;
-      }
-    ))
+    (lib.mapAttrs (name: _: self.callPackage ./${name} extraArgs))
   ]
 )

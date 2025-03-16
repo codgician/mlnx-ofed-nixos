@@ -20,7 +20,7 @@ let
   };
 in
 stdenv.mkDerivation rec {
-  pname = "mlnx-nvme";
+  pname = "mlnx-nfsrdma";
   inherit (mlnx-ofed-src) src version;
 
   unpackPhase = mkUnpackScript pname;
@@ -48,7 +48,7 @@ stdenv.mkDerivation rec {
   installFlags = kernelModuleInstallFlags;
 
   meta = with pkgs.lib; {
-    description = "Mellanox mlnx-nvme kernel module";
+    description = "Mellanox mlnx-nfsrdma kernel module";
     platforms = platforms.linux;
     maintainers = with maintainers; [ codgician ];
   };
