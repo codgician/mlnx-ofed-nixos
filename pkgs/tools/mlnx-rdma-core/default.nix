@@ -1,19 +1,19 @@
 {
   pkgs,
-  ethtool,
+  rdma-core,
   mkUnpackScript,
   mlnx-ofed-src,
   ...
 }:
 
-ethtool.overrideAttrs (oldAttrs: rec {
-  pname = "mlnx-ethtool";
+rdma-core.overrideAttrs (oldAttrs: {
+  pname = "mlnx-rdma-core";
   inherit (mlnx-ofed-src) src version;
 
-  unpackPhase = mkUnpackScript pname;
+  unpackPhase = mkUnpackScript "rdma-core";
 
   meta = with pkgs.lib; {
-    description = "Mellanox ethtool utility";
+    description = "Mellanox RDMA Core Userspace Libraries and Daemons";
     platforms = platforms.linux;
     maintainers = with maintainers; [ codgician ];
   };
