@@ -19,6 +19,8 @@ let
     dontBuild = true;
   };
 
+  callPackage = lib.callPackageWith (pkgs // mlnxPkgs);
+
   # Make unpack script for inner packages
   mkUnpackScript = pname: ''
     pattern="${pname}_*.orig.tar.gz"
@@ -30,20 +32,25 @@ let
     tar --strip-components 1 -xzf "$file"
   '';
 
-  mlnxPkgs = {
-    inherit mlnx-ofed-src;
+  mlnxPkgs =
+    {
+      inherit mlnx-ofed-src;
 
-    kernelPackages = import ./kernel-packages {
-      inherit lib pkgs;
-      extraArgs = {
-        inherit
-          kernel
-          kernelModuleMakeFlags
-          mkUnpackScript
-          mlnx-ofed-src
-          ;
+      kernelPackages = import ./kernel-packages {
+        inherit lib pkgs;
+        extraArgs = {
+          inherit
+            kernel
+            kernelModuleMakeFlags
+            mkUnpackScript
+            mlnx-ofed-src
+            ;
+        };
       };
-    };
-  };
+    }
+    // (import ./tools {
+      inherit lib callPackage;
+      extraArgs = { inherit mkUnpackScript; };
+    });
 in
 mlnxPkgs
