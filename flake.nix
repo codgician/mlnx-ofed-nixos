@@ -4,7 +4,7 @@
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
   outputs =
-    { nixpkgs, ... }:
+    { self, nixpkgs, ... }:
     let
       inherit (nixpkgs) lib;
       systems = [
@@ -19,39 +19,41 @@
       overlays.default =
         final: prev:
         let
-          mlnxRegularPkgs = builtins.removeAttrs (import ./pkgs { pkgs = prev; }) [ "kernelModules" ];
+          mkMlnxPackages =
+            {
+              kernel ? null,
+              kernelModuleMakeFlags ? null,
+            }:
+            import ./pkgs {
+              pkgs = prev;
+              inherit kernel kernelModuleMakeFlags;
+            };
+
+          mlnxRegularPkgs = builtins.removeAttrs (mkMlnxPackages { }) [ "kernelModules" ];
 
           # Function to extend kernelModules sets with our modules
           extendKernelModules =
-            { kernel, kernelModuleMakeFlags }:
+            args@{ kernel, kernelModuleMakeFlags }:
             let
-              mlnxKernelPkgs =
-                (import ./pkgs {
-                  pkgs = prev;
-                  inherit kernel kernelModuleMakeFlags;
-                }).kernelModules;
+              mlnxKernelPkgs = (mkMlnxPackages args).kernelModules;
+              # Filter valid derivations from imported kernel modules
+              validDerivation = _: v: lib.isDerivation v && v ? override && v ? meta;
             in
-            lib.filterAttrs (
-              _: value: lib.isDerivation value && value ? override && value ? meta
-            ) mlnxKernelPkgs;
-
-          # Find and extend all linuxPackages in nixpkgs
-          kernelOverrides = lib.mapAttrs (
-            key: value:
-            if
-              lib.isAttrs value && value ? kernel && value.kernel ? modDirVersion && value ? kernelModuleMakeFlags
-            then
-              value.extend (
+            lib.filterAttrs validDerivation mlnxKernelPkgs;
+        in
+        mlnxRegularPkgs
+        // {
+          linuxKernel = prev.linuxKernel // {
+            packagesFor =
+              kernel:
+              (prev.linuxKernel.packagesFor kernel).extend (
                 lpself: lpsuper:
                 (extendKernelModules {
                   inherit (lpsuper) kernel kernelModuleMakeFlags;
                 })
-              )
-            else
-              value
-          ) prev;
-        in
-        mlnxRegularPkgs // (lib.optionalAttrs prev.stdenv.hostPlatform.isLinux kernelOverrides);
+              );
+          };
+        };
 
       # Packages
       packages = forAllSystems (system: (import ./pkgs { pkgs = mkPkgs system; }));
@@ -82,6 +84,7 @@
           buildInputs = with pkgs; [ git ];
           shellHook = ''
             nix repl --expr "builtins.getFlake (builtins.toString $(git rev-parse --show-toplevel))"
+            exit $?
           '';
         }
       );
