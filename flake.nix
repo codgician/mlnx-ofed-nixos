@@ -14,6 +14,12 @@
       forAllSystems = f: lib.genAttrs systems (system: f system);
     in
     {
+      # Overlays
+      overlays = {
+        default = self: super: {
+          mlnx-ofed-src = super.callPackage ./pkgs/mlnx-ofed-src { };
+        };
+      };
 
       # Packages
       packages = forAllSystems (

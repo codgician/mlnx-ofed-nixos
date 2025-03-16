@@ -36,7 +36,7 @@ let
     ];
 
   mlnxPkgs = {
-    kernelModules = callPackagesInPath ./kernel-modules { inherit kernel kernelModuleMakeFlags; };
+    kernelPackages = callPackagesInPath ./kernel-packages { inherit kernel kernelModuleMakeFlags; };
     mlnx-ofed-src = source;
   };
 in

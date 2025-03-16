@@ -1,9 +1,14 @@
 {
+  lib,
   pkgs,
   stdenv,
   kernel,
   kernelModuleMakeFlags,
   mlnx-ofed-src,
+  writeShellScriptBin,
+
+  # Whether to copy source to $out/usr/src/ofa_kernel
+  copySource ? true,
   ...
 }:
 let
@@ -24,19 +29,31 @@ stdenv.mkDerivation {
     tar --strip-components 1 -xzf "$file"
   '';
 
-  nativeBuildInputs = kernel.moduleBuildDependencies;
+  nativeBuildInputs =
+    kernel.moduleBuildDependencies
+    # Mock update-alternatives in post build script
+    ++ lib.optional copySource (writeShellScriptBin "update-alternatives" "true");
 
-  patchPhase = ''
-    patchShebangs .
+  patchPhase =
+    ''
+      patchShebangs .
 
-    substituteInPlace ./ofed_scripts/configure \
-      --replace-warn '/bin/cp' 'cp' \
-      --replace-warn '/bin/rm' 'rm'
-    substituteInPlace ./ofed_scripts/makefile \
-      --replace-warn '/bin/ls' 'ls' \
-      --replace-warn '/bin/cp' 'cp' \
-      --replace-warn '/bin/rm' 'rm'
-  '';
+      substituteInPlace ./ofed_scripts/configure \
+        --replace-warn '/bin/cp' 'cp' \
+        --replace-warn '/bin/rm' 'rm'
+      substituteInPlace ./ofed_scripts/makefile \
+        --replace-warn '/bin/ls' 'ls' \
+        --replace-warn '/bin/cp' 'cp' \
+        --replace-warn '/bin/rm' 'rm'
+    ''
+    + lib.optionalString copySource ''
+      # Patch post build script so source could be copied
+      # this will be needed for building other mlnx kernel modules
+      substituteInPlace ./ofed_scripts/dkms_ofed_post_build.sh \
+        --replace-fail '/usr/src/ofa_kernel' '${placeholder "out"}/usr/src/ofa_kernel' \
+        --replace-warn '/bin/cp' 'cp' \
+        --replace-warn '/bin/rm' 'rm'
+    '';
 
   configureScript = "./configure";
 
@@ -67,6 +84,12 @@ stdenv.mkDerivation {
   enableParallelBuilding = true;
 
   makeFlags = kernelModuleMakeFlags ++ kernelModuleInstallFlags;
+
+  postBuild = lib.optionalString copySource ''
+    # Run post build tasks
+    export ofa_build_src=${placeholder "out"}/usr/src/ofa_kernel/${kernelVersion}
+    ./ofed_scripts/dkms_ofed_post_build.sh
+  '';
 
   installFlags = kernelModuleInstallFlags;
 
