@@ -37,9 +37,14 @@
 
           # Find and extend all linuxPackages in nixpkgs
           kernelOverrides = lib.mapAttrs (
-            _: value:
-            if lib.isAttrs value && value ? kernel && value.kernel ? modDirVersion then
-              value.extend (lpself: lpsuper: (extendKernelModules lpsuper.kernel))
+            key: value:
+            if
+              lib.hasPrefix "linuxPackages" key
+              && lib.isAttrs value
+              && value ? kernel
+              && value.kernel ? modDirVersion
+            then
+              lib.trace "key: ${key}" (value.extend (lpself: lpsuper: (extendKernelModules lpsuper.kernel)))
             else
               value
           ) prev;
