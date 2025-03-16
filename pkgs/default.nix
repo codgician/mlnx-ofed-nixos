@@ -36,7 +36,7 @@ let
     {
       inherit mlnx-ofed-src;
 
-      kernelPackages = import ./kernel-packages {
+      kernelModules = import ./kernel-modules {
         inherit lib pkgs;
         extraArgs = {
           inherit

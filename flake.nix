@@ -12,23 +12,46 @@
         "x86_64-linux"
       ];
       forAllSystems = f: lib.genAttrs systems (system: f system);
+      mkPkgs = system: import nixpkgs { inherit system; };
     in
     {
       # Overlays
-      overlays = {
-        default = self: super: {
-          mlnx-ofed-src = super.callPackage ./pkgs/mlnx-ofed-src { };
-        };
-      };
+      overlays.default =
+        final: prev:
+        let
+          mlnxPkgs = import ./pkgs { pkgs = prev; };
+          mlnxKernelPkgs = mlnxPkgs.kernelModules;
+          mlnxRegularPkgs = builtins.removeAttrs mlnxPkgs [ "kernelModules" ];
+
+          # Function to extend kernelModules sets with our modules
+          extendKernelModules =
+            kpkgs:
+            let
+              # Override each kernel package to use the specific kernel
+              makeKernelPackage =
+                name: pkg:
+                if lib.isDerivation pkg && pkg ? override && pkg ? meta then
+                  pkg.override { kernel = kpkgs.kernel; }
+                else
+                  pkg;
+            in
+            lib.mapAttrs makeKernelPackage mlnxKernelPkgs;
+
+          # Find and extend all kernelModules in nixpkgs
+          kernelOverrides = lib.mapAttrs (
+            name: value:
+            if lib.isAttrs value && value ? kernel && value.kernel ? modDirVersion then
+              value // (extendKernelModules value)
+            else
+              value
+          ) prev;
+        in
+        mlnxRegularPkgs // kernelOverrides;
 
       # Packages
-      packages = forAllSystems (
-        system:
-        (import ./pkgs {
-          pkgs = import nixpkgs { inherit system; };
-        })
-      );
+      packages = forAllSystems (system: (import ./pkgs { pkgs = mkPkgs system; }));
 
+      # Text formatters
       formatter = forAllSystems (
         system:
         with nixpkgs.legacyPackages.${system};
@@ -41,6 +64,20 @@
             yamlfmt
           ];
           text = lib.getExe treefmt;
+        }
+      );
+
+      # Dev shell that launches REPL
+      devShell = forAllSystems (
+        system:
+        let
+          pkgs = mkPkgs system;
+        in
+        pkgs.mkShell {
+          buildInputs = with pkgs; [ git ];
+          shellHook = ''
+            nix repl --expr "builtins.getFlake (builtins.toString $(git rev-parse --show-toplevel))"
+          '';
         }
       );
     };
