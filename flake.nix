@@ -4,7 +4,7 @@
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
   outputs =
-    { self, nixpkgs, ... }:
+    { nixpkgs, ... }:
     let
       inherit (nixpkgs) lib;
       systems = [
@@ -61,7 +61,7 @@
       # Text formatters
       formatter = forAllSystems (
         system:
-        with nixpkgs.legacyPackages.${system};
+        with (mkPkgs system);
         writeShellApplication {
           name = "formatter";
           runtimeInputs = [
@@ -77,11 +77,9 @@
       # Dev shell that launches REPL
       devShell = forAllSystems (
         system:
-        let
-          pkgs = mkPkgs system;
-        in
-        pkgs.mkShell {
-          buildInputs = with pkgs; [ git ];
+        with (mkPkgs system);
+        mkShell {
+          buildInputs = [ git ];
           shellHook = ''
             nix repl --expr "builtins.getFlake (builtins.toString $(git rev-parse --show-toplevel))"
             exit $?
