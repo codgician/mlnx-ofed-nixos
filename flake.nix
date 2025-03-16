@@ -4,7 +4,7 @@
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
   outputs =
-    { self, nixpkgs, ... }:
+    { nixpkgs, ... }:
     let
       inherit (nixpkgs) lib;
       systems = [
@@ -19,17 +19,21 @@
       overlays.default =
         final: prev:
         let
-          mlnxPkgs = import ./pkgs { pkgs = prev; };
-          mlnxKernelPkgs = mlnxPkgs.kernelModules;
-          mlnxRegularPkgs = builtins.removeAttrs mlnxPkgs [ "kernelModules" ];
+          mlnxRegularPkgs = builtins.removeAttrs (import ./pkgs { pkgs = prev; }) [ "kernelModules" ];
 
           # Function to extend kernelModules sets with our modules
           extendKernelModules =
             kernel:
-            lib.pipe mlnxKernelPkgs [
-              (lib.filterAttrs (_: value: lib.isDerivation value && value ? override && value ? meta))
-              (lib.mapAttrs (_: value: value.override { inherit kernel; }))
-            ];
+            let
+              mlnxKernelPkgs =
+                (import ./pkgs {
+                  pkgs = prev;
+                  inherit kernel;
+                }).kernelModules;
+            in
+            lib.filterAttrs (
+              _: value: lib.isDerivation value && value ? override && value ? meta
+            ) mlnxKernelPkgs;
 
           # Find and extend all linuxPackages in nixpkgs
           kernelOverrides = lib.mapAttrs (
