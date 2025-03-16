@@ -19,24 +19,17 @@ let
     dontBuild = true;
   };
 
-  getDirs =
-    path:
-    lib.pipe path [
-      builtins.readDir
-      (lib.filterAttrs (_: type: type == "directory"))
-    ];
-
-  callPackage = lib.callPackageWith (pkgs // mlnxPkgs);
-  callPackagesInPath =
-    path:
-    x@{ ... }:
-    lib.pipe path [
-      getDirs
-      (lib.mapAttrs (name: _: callPackage (path + "/${name}") x))
-    ];
-
   mlnxPkgs = {
-    kernelPackages = callPackagesInPath ./kernel-packages { inherit kernel kernelModuleMakeFlags; };
+    kernelPackages = import ./kernel-packages {
+      inherit
+        lib
+        pkgs
+        kernel
+        kernelModuleMakeFlags
+        ;
+      mlnx-ofed-src = source;
+    };
+
     mlnx-ofed-src = source;
   };
 in

@@ -4,8 +4,8 @@
   stdenv,
   kernel,
   kernelModuleMakeFlags,
-  kernelPackages,
   bash,
+  mlnx-ofed-kernel,
   mlnx-ofed-src,
   ...
 }:
@@ -13,7 +13,7 @@ let
   kernelModuleInstallFlags = [ "INSTALL_MOD_PATH=${placeholder "out"}" ];
   kernelDir = "${kernel.dev}/lib/modules/${kernelVersion}";
   kernelVersion = kernel.modDirVersion;
-  mlnxOfedKernel = kernelPackages.mlnx-ofed-kernel.override {
+  mlnxOfedKernel = mlnx-ofed-kernel.override {
     inherit kernel kernelModuleMakeFlags;
     copySource = true;
   };
