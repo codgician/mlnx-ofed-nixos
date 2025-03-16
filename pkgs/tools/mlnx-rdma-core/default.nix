@@ -14,7 +14,7 @@ rdma-core.overrideAttrs (oldAttrs: {
 
   meta =
     with pkgs.lib;
-    oldAttrs
+    oldAttrs.meta
     // {
       description = "(Mellanox variant) ${oldAttrs.meta.description}";
       maintainers = with maintainers; [ codgician ];
