@@ -23,12 +23,12 @@
 
           # Function to extend kernelModules sets with our modules
           extendKernelModules =
-            kernel:
+            { kernel, kernelModuleMakeFlags }:
             let
               mlnxKernelPkgs =
                 (import ./pkgs {
                   pkgs = prev;
-                  inherit kernel;
+                  inherit kernel kernelModuleMakeFlags;
                 }).kernelModules;
             in
             lib.filterAttrs (
@@ -39,12 +39,14 @@
           kernelOverrides = lib.mapAttrs (
             key: value:
             if
-              lib.hasPrefix "linuxPackages" key
-              && lib.isAttrs value
-              && value ? kernel
-              && value.kernel ? modDirVersion
+              lib.isAttrs value && value ? kernel && value.kernel ? modDirVersion && value ? kernelModuleMakeFlags
             then
-              lib.trace "key: ${key}" (value.extend (lpself: lpsuper: (extendKernelModules lpsuper.kernel)))
+              value.extend (
+                lpself: lpsuper:
+                (extendKernelModules {
+                  inherit (lpsuper) kernel kernelModuleMakeFlags;
+                })
+              )
             else
               value
           ) prev;
