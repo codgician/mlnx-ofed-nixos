@@ -51,7 +51,7 @@
               value
           ) prev;
         in
-        mlnxRegularPkgs // kernelOverrides;
+        mlnxRegularPkgs // (lib.optionalAttrs prev.stdenv.hostPlatform.isLinux kernelOverrides);
 
       # Packages
       packages = forAllSystems (system: (import ./pkgs { pkgs = mkPkgs system; }));
