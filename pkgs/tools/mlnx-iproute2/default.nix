@@ -1,16 +1,16 @@
 {
   pkgs,
-  rdma-core,
+  iproute2,
   mkUnpackScript,
   mlnx-ofed-src,
   ...
 }:
 
-rdma-core.overrideAttrs (oldAttrs: {
-  pname = "mlnx-rdma-core";
+iproute2.overrideAttrs (oldAttrs: rec {
+  pname = "mlnx-iproute2";
   inherit (mlnx-ofed-src) src version;
 
-  unpackPhase = mkUnpackScript "rdma-core";
+  unpackPhase = mkUnpackScript pname;
 
   meta =
     with pkgs.lib;

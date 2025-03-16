@@ -12,9 +12,11 @@ ethtool.overrideAttrs (oldAttrs: rec {
 
   unpackPhase = mkUnpackScript pname;
 
-  meta = with pkgs.lib; {
-    description = "Mellanox ethtool utility";
-    platforms = platforms.linux;
-    maintainers = with maintainers; [ codgician ];
-  };
+  meta =
+    with pkgs.lib;
+    oldAttrs
+    // {
+      description = "(Mellanox variant) ${oldAttrs.meta.description}";
+      maintainers = with maintainers; [ codgician ];
+    };
 })
