@@ -26,18 +26,12 @@
           # Function to extend kernelModules sets with our modules
           extendKernelModules =
             kernel:
-            let
-              # Override each kernel package to use the specific kernel
-              mapKernelPkgs =
-                _: value:
-                if lib.isDerivation value && value ? override && value ? meta then
-                  value.override { inherit kernel; }
-                else
-                  value;
-            in
-            lib.mapAttrs mapKernelPkgs mlnxKernelPkgs;
+            lib.pipe mlnxKernelPkgs [
+              (lib.filterAttrs (_: value: lib.isDerivation value && value ? override && value ? meta))
+              (lib.mapAttrs (_: value: value.override { inherit kernel; }))
+            ];
 
-          # Find and extend all kernelModules in nixpkgs
+          # Find and extend all linuxPackages in nixpkgs
           kernelOverrides = lib.mapAttrs (
             _: value:
             if lib.isAttrs value && value ? kernel && value.kernel ? modDirVersion then
