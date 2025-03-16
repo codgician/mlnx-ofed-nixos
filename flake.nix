@@ -1,5 +1,5 @@
 {
-  description = "Mellanox mlnx-ofed proprietary drivers ported to NixOS";
+  description = "Mellanox mlnx-ofed drivers ported to NixOS";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
