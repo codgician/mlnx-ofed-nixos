@@ -1,7 +1,10 @@
 {
   description = "Mellanox mlnx-ofed drivers ported to NixOS";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    flake-compat.url = "github:edolstra/flake-compat";
+  };
 
   outputs =
     { nixpkgs, ... }:
