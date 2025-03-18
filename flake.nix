@@ -39,6 +39,9 @@
           };
         };
 
+      # NixOS modules
+      nixosModules.default = import ./modules;
+
       # Packages
       packages = forAllSystems (system: (import ./pkgs { pkgs = mkPkgs system; }).packages);
 

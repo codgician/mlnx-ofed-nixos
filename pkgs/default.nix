@@ -23,12 +23,13 @@ let
     tar --strip-components 1 -xzf "$file"
   '';
 in
-{
+rec {
   # Function for building kernel modules
   mkKernelModules =
     { kernel, kernelModuleMakeFlags }:
     import ./kernel-modules {
-      inherit pkgs mkUnpackScript mlnx-ofed-src;
+      pkgs = pkgs.extend (_: _: packages);
+      inherit mkUnpackScript mlnx-ofed-src;
       inherit kernel kernelModuleMakeFlags;
     };
 
