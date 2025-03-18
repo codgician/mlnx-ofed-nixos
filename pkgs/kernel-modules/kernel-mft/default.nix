@@ -3,6 +3,7 @@
   pkgs,
   stdenv,
   kernel,
+  kernelModuleMakeFlags,
   mkUnpackScript,
   mlnx-ofed-src,
   ...
@@ -23,16 +24,22 @@ stdenv.mkDerivation rec {
     patchShebangs .
   '';
 
-  buildPhase = ''
-    runHook preBuild
+  buildPhase =
+    let
+      makeFlags = kernelModuleMakeFlags ++ [
+        "CPUARCH=${pkgs.system}"
+        "KSRC=${kernelDir}/build"
+        "KPVER=${kernelVersion}"
+      ];
+    in
+    ''
+      runHook preBuild
 
-    make -j$NIX_BUILD_CORES \
-      CPUARCH=${pkgs.system} \
-      KSRC=${kernelDir}/build \
-      KPVER=${kernelVersion}
+      make -j$NIX_BUILD_CORES \
+        ${builtins.concatStringsSep " " makeFlags}
 
-    runHook postBuild
-  '';
+      runHook postBuild
+    '';
 
   installPhase =
     ''
