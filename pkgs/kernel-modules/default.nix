@@ -1,14 +1,28 @@
 {
-  lib,
   pkgs,
-  extraArgs ? { },
+  kernel,
+  kernelModuleMakeFlags,
+  mkUnpackScript,
+  mlnx-ofed-src,
 }:
 
-lib.makeScope pkgs.newScope (
-  self:
-  lib.pipe ./. [
+let
+  inherit (pkgs) lib;
+  callPackage = lib.callPackageWith (pkgs // mlnxKernelPkgs);
+  mlnxKernelPkgs = lib.pipe ./. [
     builtins.readDir
     (lib.filterAttrs (_: type: type == "directory"))
-    (lib.mapAttrs (name: _: self.callPackage ./${name} extraArgs))
-  ]
-)
+    (lib.mapAttrs (
+      name: _:
+      callPackage ./${name} {
+        inherit
+          kernel
+          kernelModuleMakeFlags
+          mkUnpackScript
+          mlnx-ofed-src
+          ;
+      }
+    ))
+  ];
+in
+mlnxKernelPkgs

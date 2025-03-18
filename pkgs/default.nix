@@ -1,11 +1,4 @@
-{
-  pkgs,
-  kernel ? pkgs.linuxPackages.kernel,
-  kernelModuleMakeFlags ? kernel.commonMakeFlags ++ [
-    "KBUILD_OUTPUT=${kernel.dev}/lib/modules/${kernel.modDirVersion}/build"
-  ],
-  ...
-}:
+{ pkgs }:
 let
   inherit (pkgs) lib;
   sources = lib.callPackagesWith pkgs ../_sources/generated.nix { };
@@ -19,8 +12,6 @@ let
     dontBuild = true;
   };
 
-  callPackage = lib.callPackageWith (pkgs // mlnxPkgs);
-
   # Make unpack script for inner packages
   mkUnpackScript = pname: ''
     pattern="${pname}_*.orig.tar.gz"
@@ -31,26 +22,18 @@ let
     fi
     tar --strip-components 1 -xzf "$file"
   '';
-
-  mlnxPkgs =
-    {
-      inherit mlnx-ofed-src;
-
-      kernelModules = import ./kernel-modules {
-        inherit lib pkgs;
-        extraArgs = {
-          inherit
-            kernel
-            kernelModuleMakeFlags
-            mkUnpackScript
-            mlnx-ofed-src
-            ;
-        };
-      };
-    }
-    // (import ./tools {
-      inherit lib callPackage;
-      extraArgs = { inherit mkUnpackScript; };
-    });
 in
-mlnxPkgs
+{
+  # Function for building kernel modules
+  mkKernelModules =
+    { kernel, kernelModuleMakeFlags }:
+    import ./kernel-modules {
+      inherit pkgs mkUnpackScript mlnx-ofed-src;
+      inherit kernel kernelModuleMakeFlags;
+    };
+
+  # Regular non-kernel module packages
+  packages = import ./tools {
+    inherit pkgs mkUnpackScript mlnx-ofed-src;
+  };
+}
