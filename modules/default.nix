@@ -56,8 +56,8 @@ in
 
         package = lib.mkOption {
           type = types.package;
-          default = config.boot.kernelPackages.nfsrdma;
-          defaultText = "config.boot.kernelPackages.nfsrdma";
+          default = config.boot.kernelPackages.mlnx-nfsrdma;
+          defaultText = "config.boot.kernelPackages.mlnx-nfsrdma";
           example = lib.literalExpressionliteralExpression "config.boot.kernelPackages.nfsrdma";
           description = ''
             Defines which package to use for kernel module nfsrdma.
