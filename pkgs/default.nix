@@ -28,9 +28,9 @@ rec {
   mkKernelModules =
     { kernel, kernelModuleMakeFlags }:
     import ./kernel-modules {
-      pkgs = pkgs.extend (_: _: packages);
-      inherit mkUnpackScript mlnx-ofed-src;
+      inherit pkgs mkUnpackScript mlnx-ofed-src;
       inherit kernel kernelModuleMakeFlags;
+      mlnxRegularPkgs = packages;
     };
 
   # Regular non-kernel module packages

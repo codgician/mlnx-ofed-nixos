@@ -1,5 +1,6 @@
 {
   pkgs,
+  mlnxRegularPkgs ? { },
   kernel,
   kernelModuleMakeFlags,
   mkUnpackScript,
@@ -8,7 +9,7 @@
 
 let
   inherit (pkgs) lib;
-  callPackage = lib.callPackageWith (pkgs // mlnxKernelPkgs);
+  callPackage = lib.callPackageWith (pkgs // mlnxRegularPkgs // mlnxKernelPkgs);
   mlnxKernelPkgs = lib.pipe ./. [
     builtins.readDir
     (lib.filterAttrs (_: type: type == "directory"))
