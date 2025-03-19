@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 let
@@ -36,16 +37,16 @@ in
         };
       };
 
-      nvme = {
-        enable = lib.mkEnableOption "mlnx-nvme kernel module for nvme over fabrics";
+      kernel-mft = {
+        enable = lib.mkEnableOption "kernel-mft kernel module for Mellanox firmware tools";
 
         package = lib.mkOption {
           type = types.package;
-          default = config.boot.kernelPackages.mlnx-nvme;
-          defaultText = "config.boot.kernelPackages.mlnx-nvme";
-          example = lib.literalExpressionliteralExpression "config.boot.kernelPackages.mlnx-nvme";
+          default = config.boot.kernelPackages.kernel-mft;
+          defaultText = "config.boot.kernelPackages.kernel-mft";
+          example = lib.literalExpressionliteralExpression "config.boot.kernelPackages.kernel-mft";
           description = ''
-            Defines which package to use for kernel module mlnx-nvme.
+            Defines which package to use for kernel module kernel-mft.
           '';
         };
       };
@@ -64,16 +65,16 @@ in
         };
       };
 
-      kernel-mft = {
-        enable = lib.mkEnableOption "kernel-mft kernel module for Mellanox firmware tools";
+      nvme = {
+        enable = lib.mkEnableOption "mlnx-nvme kernel module for nvme over fabrics";
 
         package = lib.mkOption {
           type = types.package;
-          default = config.boot.kernelPackages.kernel-mft;
-          defaultText = "config.boot.kernelPackages.kernel-mft";
-          example = lib.literalExpressionliteralExpression "config.boot.kernelPackages.kernel-mft";
+          default = config.boot.kernelPackages.mlnx-nvme;
+          defaultText = "config.boot.kernelPackages.mlnx-nvme";
+          example = lib.literalExpressionliteralExpression "config.boot.kernelPackages.mlnx-nvme";
           description = ''
-            Defines which package to use for kernel module kernel-mft.
+            Defines which package to use for kernel module mlnx-nvme.
           '';
         };
       };
@@ -81,11 +82,15 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    # Add kernel modules
     boot.extraModulePackages =
       [ cfg.package ]
       ++ lib.optional cfg.fwctl.enable cfg.fwctl.package
-      ++ lib.optional cfg.nvme.enable cfg.nvme.package
+      ++ lib.optional cfg.kernel-mft.enable cfg.kernel-mft.package
       ++ lib.optional cfg.nfsrdma.enable cfg.nfsrdma.package
-      ++ lib.optional cfg.kernel-mft.enable cfg.kernel-mft.package;
+      ++ lib.optional cfg.nvme.enable cfg.nvme.package;
+
+    # Install mstflint
+    environment.systemPackages = with pkgs; [ mstflint ];
   };
 }
