@@ -44,13 +44,18 @@ jobs:
           signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
       - name: Build regular packages
         run: |
+          set -euo pipefail
           arch="$(uname -m)-linux"
-          nix flake show --json | jq  '.packages."$arch"|keys[]' | xargs -I {} nix build .#{}
+          nix flake show --json | jq  ".packages.\"$arch\"|keys[]" | xargs -I {} nix build .#{}
       - name: Build linux packages (stable)
         run: |
+          set -euo pipefail
           arch="$(uname -m)-linux"
-          nix flake show --json | jq  '.linuxPackages."$arch"|keys[]' | xargs -I {} nix build .#{}
+          pkgs=$(nix eval .#linuxPackages.$arch --raw --apply "x: builtins.toJSON (builtins.attrNames x)")
+          echo $pkgs | jq -r '.[]' | xargs -I {} nix build .#linuxPackages.$arch.{}
       - name: Build linux packages (latest)
         run: |
+          set -euo pipefail
           arch="$(uname -m)-linux"
-          nix flake show --json | jq  '.linuxPackages_latest."$arch"|keys[]' | xargs -I {} nix build .#{}
+          pkgs=$(nix eval .#linuxPackages_latest.$arch --raw --apply "x: builtins.toJSON (builtins.attrNames x)")
+          echo $pkgs | jq -r '.[]' | xargs -I {} nix build .#linuxPackages_latest.$arch.{}
