@@ -1,5 +1,13 @@
 {
-  description = "Mellanox mlnx-ofed drivers ported to NixOS";
+  description = "A small subset of Mellanox mlnx-ofed drivers ported to NixOS";
+
+  nixConfig = {
+    allow-import-from-derivation = "true";
+    extra-substituters = [ "https://mlnx-ofed-nixos.cachix.org" ];
+    extra-trusted-public-keys = [
+      "mlnx-ofed-nixos.cachix.org-1:jL/cqleOzhPw87etuHMeIIdAgFDKX8WnTBYMSBx3toI="
+    ];
+  };
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";

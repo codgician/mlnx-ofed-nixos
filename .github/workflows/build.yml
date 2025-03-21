@@ -1,0 +1,57 @@
+name: build
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+  repository_dispatch:
+    types: [build]
+  workflow_dispatch:
+jobs:
+  build:
+    needs: validate
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: thiagokokada/free-disk-space@main
+        continue-on-error: true
+        with:
+          tool-cache: true
+          usrlocal: true
+          usrmisc: true
+          opt: true
+          varcache: true
+      - name: Checkout new change
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: cachix/install-nix-action@v31
+        with:
+          nix_path: 'nixpkgs=https://github.com/NixOS/nixpkgs/archive/refs/heads/nixos-unstable.tar.gz'
+          extra_nix_config: |
+            accept-flake-config = true
+            experimental-features = nix-command flakes
+            builders-use-substitutes = true
+      - uses: cachix/cachix-action@v16
+        with:
+          name: mlnx-ofed-nixos
+          extraPullNames: nix-community
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+      - name: Build regular packages
+        run: |
+          arch="$(uname -m)-linux"
+          nix flake show --json | jq  '.packages."$arch"|keys[]' | xargs -I {} nix build .#{}
+      - name: Build linux packages (stable)
+        run: |
+          arch="$(uname -m)-linux"
+          nix flake show --json | jq  '.linuxPackages."$arch"|keys[]' | xargs -I {} nix build .#{}
+      - name: Build linux packages (latest)
+        run: |
+          arch="$(uname -m)-linux"
+          nix flake show --json | jq  '.linuxPackages_latest."$arch"|keys[]' | xargs -I {} nix build .#{}
