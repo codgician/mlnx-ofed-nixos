@@ -30,7 +30,7 @@ A simple example flake would be:
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     mlnx-ofed-nixos = {
       url = "github:NixOS/nixpkgs/nixos-unstable";
-      inputs.nixpkgs.override = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
