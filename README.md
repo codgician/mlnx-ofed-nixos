@@ -4,14 +4,56 @@
 
 A small subset of Mellanox OFED packages ported to NixOS.
 
-**Work in progress, packages are untested and may actually NOT WORK**
+## Warning
 
-Further docs will be available when the code is actually usable. Everything is subject to change.
+This project is experimental and may stay experimental for a long time. Not all packages are fully tested, because I don't have the hardware to validate some of the scenarios like InfiniBand. Any help or suggestions are welcomed.
 
-To add packages provided in this flake to your package universe, simply use `overlays.default` provided in this flake.
+## Binary cache
 
-To run a REPL and inspect everything this flake provides, simply run:
+- Address: `https://mlnx-ofed-nixos.cachix.org`
+- Public key: `mlnx-ofed-nixos.cachix.org-1:jL/cqleOzhPw87etuHMeIIdAgFDKX8WnTBYMSBx3toI=`
 
-```bash
-nix develop
+## Quick start
+
+### With flakes
+
+This flake provides:
+
+- `overlays.default` for adding packages into your `pkgs`
+- `nixosModules.default` for easy configuration
+
+A simple example flake would be:
+
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    mlnx-ofed-nixos = {
+      url = "github:NixOS/nixpkgs/nixos-unstable";
+      inputs.nixpkgs.override = "nixpkgs";
+    };
+  };
+
+  outputs = { self, nixpkgs, ... }@inputs: {
+    nixosConfigurations.default = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [
+        # Add packages from this repo and set up binary cache
+        inputs.mlnx-ofed-nixos.nixosModules.setupCacheAndOverlays
+        # Add configuration options from this repo
+        inputs.mlnx-ofed-nixos.nixosModules.default
+        # Example configuration
+        ({ config, ... }: {
+          hardware.mlnx-ofed = {
+            enable = true;
+            fwctl.enable = true;    
+            nvme.enable = true;
+            nfsrdma.enable = true;
+            kernel-mft.enable = true;
+          };
+        })
+      ];
+    };
+  };
+}
 ```

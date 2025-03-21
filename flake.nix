@@ -1,4 +1,4 @@
-{
+rec {
   description = "A small subset of Mellanox mlnx-ofed drivers ported to NixOS";
 
   nixConfig = {
@@ -48,7 +48,18 @@
         };
 
       # NixOS modules
-      nixosModules.default = import ./modules;
+      nixosModules = {
+        default = import ./modules;
+        setupCacheAndOverlays = _: {
+          nixpkgs = {
+            overlays = [ self.overlays.default ];
+            nix.settings = {
+              substituters = nixConfig.extra-substituters;
+              trusted-public-keys = nixConfig.extra-trusted-public-keys;
+            };
+          };
+        };
+      };
 
       # Packages
       packages = forAllSystems (system: (import ./pkgs { pkgs = mkPkgs system; }).packages);
