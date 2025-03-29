@@ -54,8 +54,10 @@ jobs:
           pkgs=$(nix eval .#linuxPackages.$arch --raw --apply "x: builtins.toJSON (builtins.attrNames x)")
           echo $pkgs | jq -r '.[]' | xargs -I {} nix build .#linuxPackages.$arch.{}
       - name: Build linux packages (latest)
+        continue-on-error: true # OFED does not always support latest kernel
         run: |
           set -euo pipefail
           arch="$(uname -m)-linux"
           pkgs=$(nix eval .#linuxPackages_latest.$arch --raw --apply "x: builtins.toJSON (builtins.attrNames x)")
           echo $pkgs | jq -r '.[]' | xargs -I {} nix build .#linuxPackages_latest.$arch.{}
+        
