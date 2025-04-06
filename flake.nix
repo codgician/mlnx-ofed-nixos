@@ -101,15 +101,17 @@ rec {
       );
 
       # Dev shell that launches REPL
-      devShell = forAllSystems (
-        system:
-        with (mkPkgs system);
-        mkShell {
-          buildInputs = [ git ];
-          shellHook = ''
-            nix repl --expr "builtins.getFlake (builtins.toString $(git rev-parse --show-toplevel))"
-            exit $?
-          '';
+      devShells = forAllSystems (
+        system: with (mkPkgs system); {
+          default = mkShell { buildInputs = [ nvfetcher ]; };
+
+          repl = mkShell {
+            buildInputs = [ git ];
+            shellHook = ''
+              nix repl --expr "builtins.getFlake (builtins.toString $(git rev-parse --show-toplevel))"
+              exit $?
+            '';
+          };
         }
       );
     };

@@ -4,7 +4,7 @@ on-unmatched = "debug"
 command = "nixfmt"
 options = []
 includes = [ "*.nix" ]
-excludes = []
+excludes = [ "_sources/*.nix" ]
 
 [formatter.md]
 command = "mdformat"
