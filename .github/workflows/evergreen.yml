@@ -53,9 +53,9 @@ jobs:
       - name: Check for newer mlnx-ofed
         id: nvfetcher
         run: |
-          cur_ver=$(jq -r '.mlnx-ofed-src.version' ./_sources/generated.json)
+          cur_ver=$(jq -r '.["mlnx-ofed-src"].version' ./_sources/generated.json)
           nix develop --command nvfetcher
-          new_ver=$(jq -r '.mlnx-ofed-src.version' ./_sources/generated.json)
+          new_ver=$(jq -r '.["mlnx-ofed-src"].version' ./_sources/generated.json)
 
           if [[ $cur_ver != $new_ver ]]; then
             echo "mlnx-ofed is updated to $new_ver, will trigger new PR..."

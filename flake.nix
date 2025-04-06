@@ -103,7 +103,7 @@ rec {
       # Dev shell that launches REPL
       devShells = forAllSystems (
         system: with (mkPkgs system); {
-          default = mkShell { buildInputs = [ nvfetcher ]; };
+          default = mkShell { buildInputs = [ nvfetcher jq ]; };
 
           repl = mkShell {
             buildInputs = [ git ];
