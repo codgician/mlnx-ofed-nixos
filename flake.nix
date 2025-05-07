@@ -65,22 +65,31 @@ rec {
       packages = forAllSystems (system: (import ./pkgs { pkgs = mkPkgs system; }).packages);
 
       # Kernel packages
-      linuxPackages = forAllSystems (
+      linuxPackages_6_1 = forAllSystems (
         system:
         let
           pkgs = mkPkgs system;
         in
         (import ./pkgs { inherit pkgs; }).mkKernelModules {
-          inherit (pkgs.linuxPackages) kernel kernelModuleMakeFlags;
+          inherit (pkgs.linuxPackages_6_1) kernel kernelModuleMakeFlags;
         }
       );
-      linuxPackages_latest = forAllSystems (
+      linuxPackages_6_6 = forAllSystems (
         system:
         let
           pkgs = mkPkgs system;
         in
         (import ./pkgs { inherit pkgs; }).mkKernelModules {
-          inherit (pkgs.linuxPackages_latest) kernel kernelModuleMakeFlags;
+          inherit (pkgs.linuxPackages_6_6) kernel kernelModuleMakeFlags;
+        }
+      );
+      linuxPackages_6_12 = forAllSystems (
+        system:
+        let
+          pkgs = mkPkgs system;
+        in
+        (import ./pkgs { inherit pkgs; }).mkKernelModules {
+          inherit (pkgs.linuxPackages_6_12) kernel kernelModuleMakeFlags;
         }
       );
 
