@@ -89,8 +89,5 @@ in
       ++ lib.optional cfg.kernel-mft.enable cfg.kernel-mft.package
       ++ lib.optional cfg.nfsrdma.enable cfg.nfsrdma.package
       ++ lib.optional cfg.nvme.enable cfg.nvme.package;
-
-    # Install mstflint
-    environment.systemPackages = with pkgs; [ mstflint ];
   };
 }
