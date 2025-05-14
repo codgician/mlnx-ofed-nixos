@@ -40,15 +40,7 @@ stdenv.mkDerivation rec {
 
   makeFlags = [ "V=1" ];
 
-  installFlags = [
-    "V=1"
-    "UDEV_DIR=${placeholder "out"}/lib/udev"
-    "SBIN_TDIR=${placeholder "out"}/sbin"
-    "SBIN_DIR=${placeholder "out"}/usr/sbin"
-    "BIN_DIR=${placeholder "out"}/usr/bin"
-    "MAN8_DIR=${placeholder "out"}/usr/share/man/man8"
-    "PYTHON_DIR=${placeholder "out"}/usr/share/mlnx-tools/python"
-  ];
+  installFlags = [ "DESTDIR=${placeholder "out"}" ];
 
   meta = with pkgs.lib; {
     description = "Mellanox mlnx-tools for managing adapters";
