@@ -21,6 +21,7 @@ This flake provides:
 
 - `overlays.default` for adding packages into your `pkgs`
 - `nixosModules.default` for easy configuration
+- `nixosModules.setupCacheAndOverlays` for configure cache and overlays automatically.
 
 A simple example flake would be:
 
@@ -29,7 +30,7 @@ A simple example flake would be:
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     mlnx-ofed-nixos = {
-      url = "github:NixOS/nixpkgs/nixos-unstable";
+      url = "github:codgician/mlnx-ofed-nixos";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
