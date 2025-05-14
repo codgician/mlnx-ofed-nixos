@@ -19,8 +19,8 @@ This project is experimental and may stay experimental for a long time. Not all 
 
 This flake provides:
 
-- `overlays.default` for adding packages into your `pkgs`
-- `nixosModules.default` for easy configuration
+- `overlays.default` for adding packages into your `pkgs`.
+- `nixosModules.default` for easy configuration.
 - `nixosModules.setupCacheAndOverlays` for configure cache and overlays automatically.
 
 A simple example flake would be:

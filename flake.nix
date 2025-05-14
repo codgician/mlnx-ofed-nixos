@@ -51,12 +51,10 @@ rec {
       nixosModules = {
         default = import ./modules;
         setupCacheAndOverlays = _: {
-          nixpkgs = {
-            overlays = [ self.overlays.default ];
-            nix.settings = {
-              substituters = nixConfig.extra-substituters;
-              trusted-public-keys = nixConfig.extra-trusted-public-keys;
-            };
+          nixpkgs.overlays = [ self.overlays.default ];
+          nix.settings = {
+            substituters = nixConfig.extra-substituters;
+            trusted-public-keys = nixConfig.extra-trusted-public-keys;
           };
         };
       };
@@ -112,7 +110,12 @@ rec {
       # Dev shell that launches REPL
       devShells = forAllSystems (
         system: with (mkPkgs system); {
-          default = mkShell { buildInputs = [ nvfetcher jq ]; };
+          default = mkShell {
+            buildInputs = [
+              nvfetcher
+              jq
+            ];
+          };
 
           repl = mkShell {
             buildInputs = [ git ];

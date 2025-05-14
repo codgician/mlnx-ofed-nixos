@@ -65,4 +65,3 @@ jobs:
           arch="$(uname -m)-linux"
           pkgs=$(nix eval .#linuxPackages_6_12.$arch --raw --apply "x: builtins.toJSON (builtins.attrNames x)")
           echo $pkgs | jq -r '.[]' | xargs -I {} nix build .#linuxPackages_6_12.$arch.{}
-        

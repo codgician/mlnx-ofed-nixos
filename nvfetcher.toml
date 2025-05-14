@@ -1,4 +1,0 @@
-[mlnx-ofed-src]
-src.webpage = "https://linux.mellanox.com/public/repo/mlnx_ofed/"
-src.regex = '(\d+\.\d+-[\d\.]+)\/'
-fetch.url = "https://linux.mellanox.com/public/repo/mlnx_ofed/$ver/MLNX_OFED_SRC-debian-$ver.tgz"

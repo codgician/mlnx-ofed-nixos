@@ -78,6 +78,20 @@ in
           '';
         };
       };
+
+      virtiofs = {
+        enable = lib.mkEnableOption "DOCA SNAP virtiofs kernel module from Mellanox";
+
+        package = lib.mkOption {
+          type = types.package;
+          default = config.boot.kernelPackages.mlnx-nvme;
+          defaultText = "config.boot.kernelPackages.virtiofs";
+          example = lib.literalExpressionliteralExpression "config.boot.kernelPackages.virtiofs";
+          description = ''
+            Defines which package to use for kernel module DOCA SNAP virtiofs.
+          '';
+        };
+      };
     };
   };
 
@@ -88,6 +102,7 @@ in
       ++ lib.optional cfg.fwctl.enable cfg.fwctl.package
       ++ lib.optional cfg.kernel-mft.enable cfg.kernel-mft.package
       ++ lib.optional cfg.nfsrdma.enable cfg.nfsrdma.package
-      ++ lib.optional cfg.nvme.enable cfg.nvme.package;
+      ++ lib.optional cfg.nvme.enable cfg.nvme.package
+      ++ lib.optional cfg.virtiofs.enable cfg.virtiofs.package;
   };
 }

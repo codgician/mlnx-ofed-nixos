@@ -20,7 +20,7 @@ let
   };
 in
 stdenv.mkDerivation rec {
-  pname = "mlnx-nvme";
+  pname = "virtiofs";
   inherit (mlnx-ofed-src) src version;
 
   unpackPhase = mkUnpackScript pname;
@@ -37,10 +37,6 @@ stdenv.mkDerivation rec {
 
   enableParallelBuilding = true;
 
-  # Fix GCC 14 build on Aarch64 platforms
-  # from incompatible pointer type [-Wincompatible-pointer-types
-  env.NIX_CFLAGS_COMPILE = lib.optionalString (stdenv.hostPlatform.isAarch64) "-Wno-error=incompatible-pointer-types";
-
   makeFlags =
     kernelModuleMakeFlags
     ++ kernelModuleInstallFlags
@@ -52,7 +48,7 @@ stdenv.mkDerivation rec {
   installFlags = kernelModuleInstallFlags;
 
   meta = with pkgs.lib; {
-    description = "Mellanox virtiofs kernel module";
+    description = "Mellanox fwctl module for managing adapter firmware";
     platforms = platforms.linux;
     maintainers = with maintainers; [ codgician ];
   };

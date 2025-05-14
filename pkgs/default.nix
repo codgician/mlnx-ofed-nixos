@@ -1,10 +1,14 @@
 { pkgs }:
 let
-  inherit (pkgs) lib;
-  sources = lib.callPackagesWith pkgs ../_sources/generated.nix { };
   mlnx-ofed-src = pkgs.stdenv.mkDerivation {
     pname = "mlnx-ofed-src";
-    inherit (sources.mlnx-ofed-src) src version;
+    version = "25.04-0.6.0.0";
+
+    src = pkgs.fetchurl {
+      url = "https://linux.mellanox.com/public/repo/doca/3.0.0-4.11.0-13611/extras/mlnx_ofed/MLNX_OFED_SRC-debian-25.04-0.6.0.0.tgz";
+      sha256 = "sha256-tyMtcCqmRUuC6NjC0fUaPyzHBmyQqxtHViUQfOx/y1g=";
+    };
+
     unpackPhase = ''
       mkdir -p $out
       tar -C $out --strip-components 1 -xzf $src 
