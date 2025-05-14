@@ -68,18 +68,18 @@ rec {
         let
           pkgs = mkPkgs system;
         in
-        (import ./pkgs { inherit pkgs; }).mkKernelModules {
+        lib.removeAttrs ((import ./pkgs { inherit pkgs; }).mkKernelModules {
           inherit (pkgs.linuxPackages_6_1) kernel kernelModuleMakeFlags;
-        }
+        }) [ "virtiofs" ] # remove unsupported kernel modules for 6.1
       );
       linuxPackages_6_6 = forAllSystems (
         system:
         let
           pkgs = mkPkgs system;
         in
-        (import ./pkgs { inherit pkgs; }).mkKernelModules {
+        lib.removeAttrs ((import ./pkgs { inherit pkgs; }).mkKernelModules {
           inherit (pkgs.linuxPackages_6_6) kernel kernelModuleMakeFlags;
-        }
+        }) [ "virtiofs" ] # remove unsupported kernel modules for 6.6
       );
       linuxPackages_6_12 = forAllSystems (
         system:

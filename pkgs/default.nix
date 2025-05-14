@@ -1,11 +1,11 @@
 { pkgs }:
 let
-  mlnx-ofed-src = pkgs.stdenv.mkDerivation {
+  mlnx-ofed-src = pkgs.stdenv.mkDerivation rec {
     pname = "mlnx-ofed-src";
     version = "25.04-0.6.0.0";
 
     src = pkgs.fetchurl {
-      url = "https://linux.mellanox.com/public/repo/doca/3.0.0-4.11.0-13611/extras/mlnx_ofed/MLNX_OFED_SRC-debian-25.04-0.6.0.0.tgz";
+      url = "https://linux.mellanox.com/public/repo/doca/3.0.0-4.11.0-13611/extras/mlnx_ofed/MLNX_OFED_SRC-debian-${version}.tgz";
       sha256 = "sha256-tyMtcCqmRUuC6NjC0fUaPyzHBmyQqxtHViUQfOx/y1g=";
     };
 
