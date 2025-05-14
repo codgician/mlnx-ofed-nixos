@@ -38,8 +38,6 @@ stdenv.mkDerivation rec {
 
   enableParallelBuilding = true;
 
-  makeFlags = [ "V=1" ];
-
   installFlags = [ "DESTDIR=${placeholder "out"}" ];
 
   meta = with pkgs.lib; {
