@@ -3,6 +3,7 @@
   mlnxRegularPkgs ? { },
   kernel,
   kernelModuleMakeFlags,
+  kernelModuleInstallFlags ? [ "INSTALL_MOD_PATH=${placeholder "out"}" ],
   mkUnpackScript,
   mlnx-ofed-src,
 }:
@@ -19,6 +20,7 @@ let
         inherit
           kernel
           kernelModuleMakeFlags
+          kernelModuleInstallFlags
           mkUnpackScript
           mlnx-ofed-src
           ;

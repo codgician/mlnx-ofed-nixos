@@ -4,6 +4,7 @@
   stdenv,
   kernel,
   kernelModuleMakeFlags,
+  kernelModuleInstallFlags,
   mkUnpackScript,
   mlnx-ofed-src,
   writeShellScriptBin,
@@ -15,7 +16,6 @@
 let
   kernelVersion = kernel.modDirVersion;
   kernelDir = "${kernel.dev}/lib/modules/${kernelVersion}";
-  kernelModuleInstallFlags = [ "INSTALL_MOD_PATH=${placeholder "out"}" ];
 in
 stdenv.mkDerivation rec {
   pname = "mlnx-ofed-kernel";
