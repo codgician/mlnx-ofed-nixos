@@ -48,7 +48,7 @@ stdenv.mkDerivation rec {
   installFlags = kernelModuleInstallFlags;
 
   meta = with pkgs.lib; {
-    description = "Mellanox fwctl module for managing adapter firmware";
+    description = "Mellanox DOCA SNAP virtiofs kernel module";
     platforms = platforms.linux;
     maintainers = with maintainers; [ codgician ];
   };
