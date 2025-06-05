@@ -107,22 +107,10 @@ rec {
         }
       );
 
-      # Dev shell that launches REPL
       devShells = forAllSystems (
         system: with (mkPkgs system); {
           default = mkShell {
-            buildInputs = [
-              nvfetcher
-              jq
-            ];
-          };
-
-          repl = mkShell {
-            buildInputs = [ git ];
-            shellHook = ''
-              nix repl --expr "builtins.getFlake (builtins.toString $(git rev-parse --show-toplevel))"
-              exit $?
-            '';
+            buildInputs = [ jq ];
           };
         }
       );
