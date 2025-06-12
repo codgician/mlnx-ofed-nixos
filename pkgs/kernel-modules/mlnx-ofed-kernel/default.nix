@@ -30,8 +30,9 @@ stdenv.mkDerivation rec {
 
   patchPhase =
     ''
-      patchShebangs .
+      runHook prePatch
 
+      patchShebangs .
       substituteInPlace ./ofed_scripts/configure \
         --replace-warn '/bin/cp' 'cp' \
         --replace-warn '/bin/rm' 'rm'
@@ -47,6 +48,8 @@ stdenv.mkDerivation rec {
         --replace-fail '/usr/src/ofa_kernel' '$out/usr/src/ofa_kernel' \
         --replace-warn '/bin/cp' 'cp' \
         --replace-warn '/bin/rm' 'rm'
+
+      runHook postPatch
     '';
 
   configureScript = "./configure";

@@ -21,7 +21,9 @@ stdenv.mkDerivation rec {
   nativeBuildInputs = kernel.moduleBuildDependencies;
 
   patchPhase = ''
+    runHook prePatch
     patchShebangs .
+    runHook postPatch
   '';
 
   buildPhase =

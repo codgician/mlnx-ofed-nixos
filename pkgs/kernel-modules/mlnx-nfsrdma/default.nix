@@ -28,11 +28,14 @@ stdenv.mkDerivation rec {
   nativeBuildInputs = kernel.moduleBuildDependencies;
 
   patchPhase = ''
-    patchShebangs .
+    runHook prePatch
 
+    patchShebangs .
     substituteInPlace ./makefile \
       --replace-warn '/bin/ls' 'ls' \
       --replace-warn '/bin/bash' '${lib.getExe bash}'
+
+    runHook postPatch
   '';
 
   enableParallelBuilding = true;
