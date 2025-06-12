@@ -44,7 +44,7 @@ stdenv.mkDerivation rec {
       # Patch post build script so source could be copied
       # this will be needed for building other mlnx kernel modules
       substituteInPlace ./ofed_scripts/dkms_ofed_post_build.sh \
-        --replace-fail '/usr/src/ofa_kernel' '${placeholder "out"}/usr/src/ofa_kernel' \
+        --replace-fail '/usr/src/ofa_kernel' '$out/usr/src/ofa_kernel' \
         --replace-warn '/bin/cp' 'cp' \
         --replace-warn '/bin/rm' 'rm'
     '';
@@ -63,6 +63,7 @@ stdenv.mkDerivation rec {
     "--with-linux-obj=${kernelDir}/build"
     "--modules-dir=${kernelDir}"
     "--kernel-version=${kernelVersion}"
+    "--prefix=$out/usr"
   ];
 
   # Paralellize configure phase
@@ -76,7 +77,7 @@ stdenv.mkDerivation rec {
 
   postBuild = lib.optionalString copySource ''
     # Run post build tasks
-    export ofa_build_src=${placeholder "out"}/usr/src/ofa_kernel/${kernelVersion}
+    export ofa_build_src=$out/usr/src/ofa_kernel/${kernelVersion}
     ./ofed_scripts/dkms_ofed_post_build.sh
   '';
 
