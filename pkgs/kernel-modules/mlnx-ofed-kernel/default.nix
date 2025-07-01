@@ -56,12 +56,15 @@ stdenv.mkDerivation rec {
 
   configureFlags = [
     "--with-core-mod"
-    "--with-user_mad-mod"
     "--with-user_access-mod"
+    "--with-user_mad-mod"
     "--with-addr_trans-mod"
     "--with-mlx5-mod"
+    "--with-mlx5-ipsec"
+    "--with-mlxdevm-mod"
     "--with-mlxfw-mod"
     "--with-ipoib-mod"
+    "--with-user_mad-mod"
     "--with-linux=${kernelDir}/source"
     "--with-linux-obj=${kernelDir}/build"
     "--modules-dir=${kernelDir}"
