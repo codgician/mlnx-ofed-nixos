@@ -61,6 +61,7 @@ stdenv.mkDerivation rec {
     "--with-addr_trans-mod"
     "--with-mlx5-mod"
     "--with-mlx5-ipsec"
+    "--with-mlx5_inf-mod"
     "--with-mlxdevm-mod"
     "--with-mlxfw-mod"
     "--with-ipoib-mod"
