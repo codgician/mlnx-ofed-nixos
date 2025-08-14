@@ -114,5 +114,27 @@ rec {
           };
         }
       );
+
+      apps = forAllSystems (
+        system: with (mkPkgs system); {
+          updater = {
+            type = "app";
+            meta = {
+              description = "Checking for updates of mlnx-ofed source.";
+              license = lib.licenses.mit;
+              maintainers = with lib.maintainers; [ codgician ];
+            };
+
+            program = lib.getExe (writeShellApplication {
+              name = "updater";
+              runtimeInputs = [
+                jq
+                curl
+              ];
+              text = builtins.readFile ./update.sh;
+            });
+          };
+        }
+      );
     };
 }
