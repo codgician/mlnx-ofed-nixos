@@ -29,7 +29,7 @@ stdenv.mkDerivation rec {
   buildPhase =
     let
       makeFlags = kernelModuleMakeFlags ++ [
-        "CPUARCH=${pkgs.system}"
+        "CPUARCH=${stdenv.hostPlatform.system}"
         "KSRC=${kernelDir}/build"
         "KPVER=${kernelVersion}"
       ];
