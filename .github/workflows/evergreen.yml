@@ -9,7 +9,7 @@ permissions:
   contents: write
   pull-requests: write
 jobs:
-  evergreen:
+  flake:
     if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
@@ -51,9 +51,27 @@ jobs:
               repo: context.repo.repo,
               event_type: 'build',
             });
+  package:
+    needs: flake
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          persist-credentials: 'true'
+      - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            accept-flake-config = true
+            experimental-features = nix-command flakes
+            builders-use-substitutes = true
       - name: Check for newer mlnx-ofed version
         id: run_update_script
         run: |
+          git config user.name github-actions[bot]
+          git config user.email github-actions[bot]@users.noreply.github.com
+
           if nix run .#updater -- --commit; then
             commits_count=$(git rev-list --all --count)
             if [ "$commits_count" -ge 2 ]; then
