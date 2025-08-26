@@ -47,7 +47,6 @@ A simple example flake would be:
         ({ config, ... }: {
           hardware.mlnx-ofed = {
             enable = true;
-            fwctl.enable = true;    
             nvme.enable = true;
             nfsrdma.enable = true;
             kernel-mft.enable = true;
