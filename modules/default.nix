@@ -9,6 +9,21 @@ let
   cfg = config.hardware.mlnx-ofed;
 in
 {
+  imports = [
+    (lib.mkRemovedOptionModule [
+      "hardware"
+      "mlnx-ofed"
+      "fwctl"
+      "enable"
+    ] "fwctl kernel module is removed since mlnx-ofed 25.07")
+    (lib.mkRemovedOptionModule [
+      "hardware"
+      "mlnx-ofed"
+      "fwctl"
+      "package"
+    ] "fwctl kernel module is removed since mlnx-ofed 25.07")
+  ];
+
   options = {
     hardware.mlnx-ofed = {
       enable = lib.mkEnableOption "MLNX-OFED drivers";
@@ -21,20 +36,6 @@ in
         description = ''
           Defines which package to use for kernel module mlnx-ofed-kernel.
         '';
-      };
-
-      fwctl = {
-        enable = lib.mkEnableOption "fwctl kernel module for firmware control";
-
-        package = lib.mkOption {
-          type = types.package;
-          default = config.boot.kernelPackages.fwctl;
-          defaultText = "config.boot.kernelPackages.fwctl";
-          example = lib.literalExpressionliteralExpression "config.boot.kernelPackages.fwctl";
-          description = ''
-            Defines which package to use for kernel module fwctl.
-          '';
-        };
       };
 
       kernel-mft = {
@@ -100,7 +101,6 @@ in
     boot.extraModulePackages = [
       cfg.package
     ]
-    ++ lib.optional cfg.fwctl.enable cfg.fwctl.package
     ++ lib.optional cfg.kernel-mft.enable cfg.kernel-mft.package
     ++ lib.optional cfg.nfsrdma.enable cfg.nfsrdma.package
     ++ lib.optional cfg.nvme.enable cfg.nvme.package
