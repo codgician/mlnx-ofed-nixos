@@ -43,19 +43,18 @@ stdenv.mkDerivation rec {
       runHook postBuild
     '';
 
-  installPhase =
-    ''
-      install_dir=$out/lib/modules/${kernelVersion}/updates
-      mkdir -p $install_dir
-      cp ./mst_backward_compatibility/mst_pci/mst_pci.ko $install_dir
-      cp ./mst_backward_compatibility/mst_pciconf/mst_pciconf.ko $install_dir
-    ''
-    + lib.optionalString (stdenv.hostPlatform.isPower) ''
-      cp ./mst_backward_compatibility/mst_ppc/mst_ppc_pci_reset.ko $install_dir
-    ''
-    + lib.optionalString (stdenv.hostPlatform.isAarch64) ''
-      cp ./misc_drivers/bf3_livefish/bf3_livefish.ko $install_dir
-    '';
+  installPhase = ''
+    install_dir=$out/lib/modules/${kernelVersion}/updates
+    mkdir -p $install_dir
+    cp ./mst_backward_compatibility/mst_pci/mst_pci.ko $install_dir
+    cp ./mst_backward_compatibility/mst_pciconf/mst_pciconf.ko $install_dir
+  ''
+  + lib.optionalString (stdenv.hostPlatform.isPower) ''
+    cp ./mst_backward_compatibility/mst_ppc/mst_ppc_pci_reset.ko $install_dir
+  ''
+  + lib.optionalString (stdenv.hostPlatform.isAarch64) ''
+    cp ./misc_drivers/bf3_livefish/bf3_livefish.ko $install_dir
+  '';
 
   meta = with pkgs.lib; {
     description = "Mellanox kernel-mft module";

@@ -128,8 +128,9 @@ rec {
             program = lib.getExe (writeShellApplication {
               name = "updater";
               runtimeInputs = [
-                jq
                 curl
+                git
+                jq
               ];
               text = builtins.readFile ./update.sh;
             });

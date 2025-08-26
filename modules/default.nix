@@ -97,12 +97,13 @@ in
 
   config = lib.mkIf cfg.enable {
     # Add kernel modules
-    boot.extraModulePackages =
-      [ cfg.package ]
-      ++ lib.optional cfg.fwctl.enable cfg.fwctl.package
-      ++ lib.optional cfg.kernel-mft.enable cfg.kernel-mft.package
-      ++ lib.optional cfg.nfsrdma.enable cfg.nfsrdma.package
-      ++ lib.optional cfg.nvme.enable cfg.nvme.package
-      ++ lib.optional cfg.virtiofs.enable cfg.virtiofs.package;
+    boot.extraModulePackages = [
+      cfg.package
+    ]
+    ++ lib.optional cfg.fwctl.enable cfg.fwctl.package
+    ++ lib.optional cfg.kernel-mft.enable cfg.kernel-mft.package
+    ++ lib.optional cfg.nfsrdma.enable cfg.nfsrdma.package
+    ++ lib.optional cfg.nvme.enable cfg.nvme.package
+    ++ lib.optional cfg.virtiofs.enable cfg.virtiofs.package;
   };
 }

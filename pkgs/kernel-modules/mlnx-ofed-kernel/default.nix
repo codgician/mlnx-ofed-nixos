@@ -28,29 +28,28 @@ stdenv.mkDerivation rec {
     # Mock update-alternatives in post build script
     ++ lib.optional copySource (writeShellScriptBin "update-alternatives" "true");
 
-  patchPhase =
-    ''
-      runHook prePatch
+  patchPhase = ''
+    runHook prePatch
 
-      patchShebangs .
-      substituteInPlace ./ofed_scripts/configure \
-        --replace-warn '/bin/cp' 'cp' \
-        --replace-warn '/bin/rm' 'rm'
-      substituteInPlace ./ofed_scripts/makefile \
-        --replace-warn '/bin/ls' 'ls' \
-        --replace-warn '/bin/cp' 'cp' \
-        --replace-warn '/bin/rm' 'rm'
-    ''
-    + lib.optionalString copySource ''
-      # Patch post build script so source could be copied
-      # this will be needed for building other mlnx kernel modules
-      substituteInPlace ./ofed_scripts/dkms_ofed_post_build.sh \
-        --replace-fail '/usr/src/ofa_kernel' '$out/usr/src/ofa_kernel' \
-        --replace-warn '/bin/cp' 'cp' \
-        --replace-warn '/bin/rm' 'rm'
+    patchShebangs .
+    substituteInPlace ./ofed_scripts/configure \
+      --replace-warn '/bin/cp' 'cp' \
+      --replace-warn '/bin/rm' 'rm'
+    substituteInPlace ./ofed_scripts/makefile \
+      --replace-warn '/bin/ls' 'ls' \
+      --replace-warn '/bin/cp' 'cp' \
+      --replace-warn '/bin/rm' 'rm'
+  ''
+  + lib.optionalString copySource ''
+    # Patch post build script so source could be copied
+    # this will be needed for building other mlnx kernel modules
+    substituteInPlace ./ofed_scripts/dkms_ofed_post_build.sh \
+      --replace-fail '/usr/src/ofa_kernel' '$out/usr/src/ofa_kernel' \
+      --replace-warn '/bin/cp' 'cp' \
+      --replace-warn '/bin/rm' 'rm'
 
-      runHook postPatch
-    '';
+    runHook postPatch
+  '';
 
   configureScript = "./configure";
 

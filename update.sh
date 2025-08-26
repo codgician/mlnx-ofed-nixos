@@ -1,248 +1,171 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Configuration
-BASE_URL="https://linux.mellanox.com/public/repo/doca/"
-JSON_FILE="version.json"
+readonly BASE_URL="https://linux.mellanox.com/public/repo/doca/"
+readonly JSON_FILE="version.json"
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+die() { echo "ERROR: $*" >&2; exit 1; }
+log() { echo "INFO: $*" >&2; }
 
-log() {
-    echo -e "${BLUE}[INFO]${NC} $*" >&2
+# Show help message
+show_help() {
+    cat << EOF
+Usage: $0 [OPTIONS]
+
+Update MLNX-OFED source package information by scanning the latest versions
+from https://linux.mellanox.com/public/repo/doca/
+
+OPTIONS:
+    --check     Check for updates without applying them
+    --commit    Commit changes to git after successful update
+    --help      Show this help message
+
+EXAMPLES:
+    $0                  # Update to latest version
+    $0 --check          # Check for updates only
+    $0 --commit         # Update and commit changes
+    $0 --check --commit # Invalid: cannot use both flags together
+
+EOF
 }
 
-warn() {
-    echo -e "${YELLOW}[WARN]${NC} $*" >&2
+# Extract links from HTML
+extract_links() { grep -o 'href="[^"]*"' | cut -d'"' -f2; }
+
+# Check if directory is a versioned release (not a pointer)
+is_release() { 
+    case "$1" in
+        [0-9]*.[0-9]*.[0-9]*-*/) return 0 ;;
+        *) return 1 ;;
+    esac
 }
 
-error() {
-    echo -e "${RED}[ERROR]${NC} $*" >&2
-}
-
-success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $*" >&2
-}
-
-# Check if a version folder is valid (not latest/lts/etc)
-is_valid_version() {
-    local version="$1"
-    # Skip folders containing these patterns
-    if [[ "$version" =~ (latest|lts|tmp|DGX_|bclinux) ]]; then
-        return 1
-    fi
-    # Only consider folders that look like version numbers with a dash suffix (x.y.z-something)
-    # This ensures we get deterministic versions and not dynamic pointers like "3.0.0"
-    if [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+-.*$ ]]; then
-        return 0
-    fi
-    return 1
-}
-
-# Get current version from JSON
-get_current_version() {
-    if [[ -f "$JSON_FILE" ]]; then
-        jq -r '.version' "$JSON_FILE"
-    else
-        error "JSON file $JSON_FILE not found"
-        exit 1
+# Find the MLNX_OFED directory (case insensitive)
+find_mlnx_dir() {
+    local result
+    result=$(curl -s "$1/SOURCES/" 2>/dev/null | extract_links | grep -i '^mlnx[_-]ofed/$' | head -1)
+    if [ -n "$result" ]; then
+        echo "$result"
     fi
 }
 
-# Find all valid versions with MLNX-OFED sources
-find_latest_version() {
-    log "Fetching directory listing from $BASE_URL"
-    local html
-    html=$(curl -s "$BASE_URL")
-    
-    local directories
-    # Sort in descending order for faster search
-    directories=$(echo "$html" | grep -oP 'href="[^"]*/"' | sed 's/href="//;s/\/"//' | grep -v "^[.]" | sort -V -r)
-    
-    local latest_doca_version=""
-    local latest_mlnx_version=""
-    local latest_url=""
-    
-    while IFS= read -r dir; do
-        [[ -z "$dir" ]] && continue
-        
-        if ! is_valid_version "$dir"; then
-            continue
-        fi
-        
-        log "Checking version folder: $dir"
-        
-        # Check if SOURCES/MLNX_OFED/ exists
-        local sources_url="${BASE_URL}${dir}/SOURCES/MLNX_OFED/"
-        local sources_html
-        
-        if ! sources_html=$(curl -s "$sources_url" 2>/dev/null); then
-            warn "  Failed to fetch $sources_url"
-            continue
-        fi
-        
-        # Check if it's a 404 or valid page
-        if [[ "$sources_html" =~ "404 Not Found" ]]; then
-            warn "  No SOURCES/MLNX_OFED/ found in $dir"
-            continue
-        fi
-        
-        # Look for debian .tgz file
-        local files
-        files=$(echo "$sources_html" | grep -oP 'href="[^"]*[^/]"' | sed 's/href="//;s/"//' | grep -v "^[.]")
-        
-        local debian_file
-        debian_file=$(echo "$files" | grep "^MLNX_OFED_SRC-debian-.*\.tgz$" | head -n1)
-        
-        if [[ -z "$debian_file" ]]; then
-            warn "  No debian .tgz file found in $dir"
-            continue
-        fi
-        
-        # Extract MLNX version from filename
-        local mlnx_version
-        if [[ "$debian_file" =~ MLNX_OFED_SRC-debian-(.+)\.tgz ]]; then
-            mlnx_version="${BASH_REMATCH[1]}"
-        else
-            warn "  Could not extract version from $debian_file"
-            continue
-        fi
-        
-        local download_url="${sources_url}${debian_file}"
-        
-        log "  Found: $debian_file (MLNX version: $mlnx_version)"
-        
-        # Since we're iterating in descending order, the first valid version we find is the latest
-        if [[ -z "$latest_mlnx_version" ]]; then
-            latest_doca_version="$dir"
-            latest_mlnx_version="$mlnx_version"
-            latest_url="$download_url"
-            
-            # Early termination: we found the latest version, no need to continue
-            log "  This is the latest version, stopping search"
-            break
-        fi
-        
-    done <<< "$directories"
-    
-    if [[ -z "$latest_mlnx_version" ]]; then
-        error "No valid MLNX-OFED versions found"
-        exit 1
+# Find debian package in directory
+find_package() {
+    local result
+    result=$(curl -s "$1" | extract_links | grep '^MLNX_OFED_SRC-debian-.*\.tgz$' | head -1)
+    if [ -n "$result" ]; then
+        echo "$result"
     fi
-    
-    echo "$latest_doca_version|$latest_mlnx_version|$latest_url"
 }
 
-# Update JSON file with new version info
-update_json() {
-    local version="$1"
-    local url="$2"
-    local sha256="$3"
+# Find latest version
+find_latest() {
+    log "Finding latest version"
     
-    local temp_file
-    temp_file=$(mktemp)
+    local dirs
+    dirs=$(curl -s "$BASE_URL" | extract_links | grep '/$' | sort -Vr)
     
-    jq -n \
-        --arg version "$version" \
-        --arg url "$url" \
-        --arg sha256 "$sha256" \
-        '{
-            version: $version,
-            url: $url,
-            sha256: $sha256
-        }' > "$temp_file"
+    local dir
+    for dir in $dirs; do
+        is_release "$dir" || continue
+        
+        log "Checking $dir"
+        mlnx_dir=$(find_mlnx_dir "${BASE_URL}${dir}")
+        if [ -z "$mlnx_dir" ]; then
+            continue
+        fi
+        
+        sources_url="${BASE_URL}${dir}SOURCES/${mlnx_dir}"
+        package=$(find_package "$sources_url")
+        if [ -z "$package" ]; then
+            continue
+        fi
+        
+        if echo "$package" | grep -q '^MLNX_OFED_SRC-debian-.*\.tgz$'; then
+            # Extract version using parameter expansion instead of sed
+            version="${package#MLNX_OFED_SRC-debian-}"
+            version="${version%.tgz}"
+            echo "${version}|${sources_url}${package}"
+            return 0
+        fi
+    done
     
-    mv "$temp_file" "$JSON_FILE"
-    success "Updated $JSON_FILE"
+    die "No packages found"
 }
 
-# Main function
 main() {
-    local check_only=false
-    
     # Parse arguments
-    while [[ $# -gt 0 ]]; do
-        case $1 in
+    local check_only=false
+    local commit_changes=false
+    
+    while [ $# -gt 0 ]; do
+        case "$1" in
             --check)
                 check_only=true
                 shift
                 ;;
-            -h|--help)
-                echo "Usage: $0 [--check] [--help]"
-                echo "  --check    Only check for updates, don't modify files"
-                echo "  --help     Show this help message"
+            --commit)
+                commit_changes=true
+                shift
+                ;;
+            --help|-h)
+                show_help
                 exit 0
                 ;;
             *)
-                error "Unknown argument: $1"
-                exit 1
+                die "Unknown argument: $1. Use --help for usage information."
                 ;;
         esac
     done
     
+    # Validate argument combinations
+    if [ "$check_only" = true ] && [ "$commit_changes" = true ]; then
+        die "Cannot use --check and --commit together"
+    fi
+    
     # Check dependencies
-    if ! command -v jq >/dev/null 2>&1; then
-        error "jq is required but not installed"
-        exit 1
+    command -v jq >/dev/null || die "jq required"
+    command -v curl >/dev/null || die "curl required"
+    if [ "$commit_changes" = true ]; then
+        command -v git >/dev/null || die "git required for --commit"
     fi
     
-    if ! command -v curl >/dev/null 2>&1; then
-        error "curl is required but not installed"
-        exit 1
-    fi
+    # Get current and latest versions
+    current=$(jq -r '.version' "$JSON_FILE" 2>/dev/null || echo "none")
+    latest_data=$(find_latest)
+    IFS='|' read -r latest_version latest_url <<< "$latest_data"
     
-    # Get current version
-    local current_version
-    current_version=$(get_current_version)
-    log "Current version: $current_version"
+    log "Current: $current"
+    log "Latest: $latest_version"
     
-    # Find latest version
-    log "Scanning for available MLNX-OFED versions..."
-    local latest_info
-    latest_info=$(find_latest_version)
-    
-    IFS='|' read -r doca_version mlnx_version url <<< "$latest_info"
-    
-    log "Latest version found:"
-    log "  DOCA version: $doca_version"
-    log "  MLNX version: $mlnx_version"
-    log "  URL: $url"
-    
-    # Check if update is needed
-    if [[ "$current_version" == "$mlnx_version" ]]; then
-        success "Already up to date!"
+    # Check if update needed
+    if [ "$current" = "$latest_version" ]; then
+        log "Up to date"
         exit 0
     fi
     
-    log "Update available: $current_version -> $mlnx_version"
-    
-    if [[ "$check_only" == true ]]; then
-        log "Check-only mode, not updating files"
+    log "Update available: $current -> $latest_version"
+    if [ "$check_only" = true ]; then
+        log "Check mode"
         exit 0
     fi
     
-    # Calculate new SHA256
-    log "Calculating SHA256 for $url"
-    local new_sha256
-    if command -v nix-prefetch-url >/dev/null 2>&1; then
-        new_sha256=$(nix-prefetch-url --type sha256 "$url" 2>/dev/null | tail -n1)
-    else
-        error "nix-prefetch-url not found"
-        exit 1
+    # Update
+    log "Updating..."
+    hash=$(nix-prefetch-url "$latest_url" 2>/dev/null | tail -1) || die "Hash failed" 
+    hash=$(nix-hash --to-sri --type sha256 "$hash") 
+    jq -n --arg v "$latest_version" --arg u "$latest_url" --arg h "$hash" \
+        '{version: $v, url: $u, sha256: $h}' > "$JSON_FILE"
+    
+    log "Updated to $latest_version"
+    
+    # Commit changes if requested
+    if [ "$commit_changes" = true ]; then
+        log "Committing changes..."
+        git add "$JSON_FILE"
+        git commit -m "mlnx-ofed-src: $current -> $latest_version"
+        log "Changes committed"
     fi
-    
-    log "New SHA256: $new_sha256"
-    
-    # Update JSON file
-    update_json "$mlnx_version" "$url" "$new_sha256"
-    
-    success "Update completed successfully!"
-    success "Updated from $current_version to $mlnx_version"
 }
 
-# Run main function
 main "$@"
