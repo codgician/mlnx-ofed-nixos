@@ -1,7 +1,7 @@
 name: evergreen
 on:
   schedule:
-    - cron: '0 7 * * */5' # At 7:00 on every 5th day of week
+    - cron: '0 7 * * 5' # At 7:00 on every Friday
   workflow_dispatch:
 # Limit one run for each branch to avoid hazards
 concurrency: ${{ github.workflow }}-${{ github.ref }}
