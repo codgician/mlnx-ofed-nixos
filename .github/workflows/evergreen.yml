@@ -52,6 +52,7 @@ jobs:
               event_type: 'build',
             });
   package:
+    if: ${{ github.ref == 'refs/heads/main' }}
     needs: flake
     runs-on: ubuntu-latest
     steps:
