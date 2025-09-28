@@ -3,7 +3,7 @@
   mlnxRegularPkgs ? { },
   kernel,
   kernelModuleMakeFlags,
-  kernelModuleInstallFlags ? [ "INSTALL_MOD_PATH=${placeholder "out"}" ],
+  kernelModuleInstallFlags ? [ "INSTALL_MOD_PATH=$(out)" ],
   mkUnpackScript,
   mlnx-ofed-src,
 }:
