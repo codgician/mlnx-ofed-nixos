@@ -10,7 +10,7 @@ rec {
   };
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
     flake-compat.url = "github:edolstra/flake-compat";
   };
 
