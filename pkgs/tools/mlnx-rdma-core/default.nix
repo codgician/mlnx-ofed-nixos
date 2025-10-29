@@ -1,5 +1,5 @@
 {
-  pkgs,
+  lib,
   rdma-core,
   mkUnpackScript,
   mlnx-ofed-src,
@@ -13,7 +13,7 @@ rdma-core.overrideAttrs (oldAttrs: {
   unpackPhase = mkUnpackScript "rdma-core";
 
   meta =
-    with pkgs.lib;
+    with lib;
     oldAttrs.meta
     // {
       description = "(Mellanox variant) ${oldAttrs.meta.description}";

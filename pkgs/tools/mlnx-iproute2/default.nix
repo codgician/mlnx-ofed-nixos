@@ -1,5 +1,5 @@
 {
-  pkgs,
+  lib,
   iproute2,
   mkUnpackScript,
   mlnx-ofed-src,
@@ -13,7 +13,7 @@ iproute2.overrideAttrs (oldAttrs: rec {
   unpackPhase = mkUnpackScript pname;
 
   meta =
-    with pkgs.lib;
+    with lib;
     oldAttrs.meta
     // {
       description = "(Mellanox variant) ${oldAttrs.meta.description}";

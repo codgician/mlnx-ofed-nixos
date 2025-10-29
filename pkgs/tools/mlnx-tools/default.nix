@@ -1,5 +1,5 @@
 {
-  pkgs,
+  lib,
   stdenv,
   python3,
   mstflint,
@@ -40,7 +40,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   installFlags = [ "DESTDIR=${placeholder "out"}" ];
 
-  meta = with pkgs.lib; {
+  meta = with lib; {
     description = "Mellanox mlnx-tools for managing adapters";
     platforms = platforms.linux;
     maintainers = with maintainers; [ codgician ];

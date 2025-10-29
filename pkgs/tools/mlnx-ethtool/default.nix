@@ -1,5 +1,5 @@
 {
-  pkgs,
+  lib,
   ethtool,
   mkUnpackScript,
   mlnx-ofed-src,
@@ -13,7 +13,7 @@ ethtool.overrideAttrs (oldAttrs: rec {
   unpackPhase = mkUnpackScript pname;
 
   meta =
-    with pkgs.lib;
+    with lib;
     oldAttrs.meta
     // {
       description = "(Mellanox variant) ${oldAttrs.meta.description}";
