@@ -36,13 +36,10 @@ stdenv.mkDerivation (finalAttrs: {
 
   enableParallelBuilding = true;
 
-  makeFlags =
-    kernelModuleMakeFlags
-    ++ kernelModuleInstallFlags
-    ++ [
-      "OFA_DIR=${mlnxOfedKernel}/src/ofa_kernel"
-      "K_BUILD=${kernelDir}/build"
-    ];
+  makeFlags = kernelModuleMakeFlags ++ [
+    "OFA_DIR=${mlnxOfedKernel}/src/ofa_kernel"
+    "K_BUILD=${kernelDir}/build"
+  ];
 
   installFlags = kernelModuleInstallFlags;
 

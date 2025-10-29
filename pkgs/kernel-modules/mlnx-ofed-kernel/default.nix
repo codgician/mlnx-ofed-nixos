@@ -79,7 +79,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   enableParallelBuilding = true;
 
-  makeFlags = kernelModuleMakeFlags ++ kernelModuleInstallFlags;
+  makeFlags = kernelModuleMakeFlags;
 
   postBuild = lib.optionalString copySource ''
     # Run post build tasks

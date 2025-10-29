@@ -40,13 +40,10 @@ stdenv.mkDerivation (finalAttrs: {
   # from incompatible pointer type [-Wincompatible-pointer-types
   env.NIX_CFLAGS_COMPILE = lib.optionalString (stdenv.hostPlatform.isAarch64) "-Wno-error=incompatible-pointer-types";
 
-  makeFlags =
-    kernelModuleMakeFlags
-    ++ kernelModuleInstallFlags
-    ++ [
-      "OFA_DIR=${mlnxOfedKernel}/src/ofa_kernel"
-      "K_BUILD=${kernelDir}/build"
-    ];
+  makeFlags = kernelModuleMakeFlags ++ [
+    "OFA_DIR=${mlnxOfedKernel}/src/ofa_kernel"
+    "K_BUILD=${kernelDir}/build"
+  ];
 
   installFlags = kernelModuleInstallFlags;
 
