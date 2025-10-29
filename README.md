@@ -4,7 +4,6 @@
 ![license](https://img.shields.io/github/license/codgician/mlnx-ofed-nixos)
 ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcodgician%2Fmlnx-ofed-nixos%2Frefs%2Fheads%2Fmain%2Fversion.json&query=%24.version&label=version)
 
-
 A small subset of Mellanox OFED packages ported to NixOS.
 
 ## Warning

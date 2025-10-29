@@ -1,5 +1,7 @@
 { pkgs }:
 let
+  inherit (pkgs) lib;
+
   # Load package info from JSON
   packageInfo = builtins.fromJSON (builtins.readFile ../version.json);
 
@@ -24,19 +26,41 @@ let
     fi
     tar --strip-components 1 -xzf "$file"
   '';
-in
-rec {
-  # Function for building kernel modules
-  mkKernelModules =
-    { kernel, kernelModuleMakeFlags }:
-    import ./kernel-modules {
-      inherit pkgs mkUnpackScript mlnx-ofed-src;
-      inherit kernel kernelModuleMakeFlags;
-      mlnxRegularPkgs = packages;
-    };
+
+  # Build packages from a directory, allowing cross-package references
+  mkPackageSet =
+    extraArgs: path:
+    lib.fix (
+      self:
+      let
+        dirs = lib.filterAttrs (_: type: type == "directory") (builtins.readDir path);
+        callPackage = lib.callPackageWith (pkgs // extraArgs // self);
+        baseArgs = {
+          inherit pkgs mkUnpackScript mlnx-ofed-src;
+        }
+        // extraArgs;
+      in
+      lib.mapAttrs (name: _: callPackage (path + "/${name}") baseArgs) dirs
+    );
 
   # Regular non-kernel module packages
-  packages = import ./tools {
-    inherit pkgs mkUnpackScript mlnx-ofed-src;
-  };
+  regularPackages = mkPackageSet { } ./tools;
+
+  # Function for building kernel modules with kernel-specific arguments
+  mkKernelModules =
+    {
+      kernel,
+      kernelModuleMakeFlags,
+      kernelModuleInstallFlags ? [ "INSTALL_MOD_PATH=$(out)" ],
+    }:
+    mkPackageSet (
+      regularPackages
+      // {
+        inherit kernel kernelModuleMakeFlags kernelModuleInstallFlags;
+      }
+    ) ./kernel-modules;
+in
+{
+  inherit mkKernelModules;
+  packages = regularPackages;
 }
