@@ -19,20 +19,19 @@ let
     copySource = true;
   };
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation (finalAttrs: {
   pname = "virtiofs";
   inherit (mlnx-ofed-src) src version;
 
-  unpackPhase = mkUnpackScript pname;
+  unpackPhase = mkUnpackScript finalAttrs.pname;
 
   nativeBuildInputs = kernel.moduleBuildDependencies;
 
   patchPhase = ''
-    patchShebangs .
-
     substituteInPlace ./makefile \
       --replace-warn '/bin/ls' 'ls' \
       --replace-warn '/bin/bash' '${lib.getExe bash}'
+    patchShebangs .
   '';
 
   enableParallelBuilding = true;
@@ -41,7 +40,7 @@ stdenv.mkDerivation rec {
     kernelModuleMakeFlags
     ++ kernelModuleInstallFlags
     ++ [
-      "OFA_DIR=${mlnxOfedKernel}/usr/src/ofa_kernel"
+      "OFA_DIR=${mlnxOfedKernel}/src/ofa_kernel"
       "K_BUILD=${kernelDir}/build"
     ];
 
@@ -52,4 +51,4 @@ stdenv.mkDerivation rec {
     platforms = platforms.linux;
     maintainers = with maintainers; [ codgician ];
   };
-}
+})

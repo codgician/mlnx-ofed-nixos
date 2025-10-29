@@ -9,11 +9,11 @@
   ...
 }:
 
-stdenv.mkDerivation rec {
+stdenv.mkDerivation (finalAttrs: {
   pname = "mlnx-tools";
   inherit (mlnx-ofed-src) src version;
 
-  unpackPhase = mkUnpackScript pname;
+  unpackPhase = mkUnpackScript finalAttrs.pname;
 
   nativeBuildInputs = [ ];
 
@@ -23,7 +23,7 @@ stdenv.mkDerivation rec {
     mlnx-ethtool
   ];
 
-  patchPhase = ''
+  postPatch = ''
     substituteInPlace sbin/* \
       --replace-warn '/bin/ls' 'ls' \
       --replace-warn '/bin/systemctl' 'systemctl' \
@@ -45,4 +45,4 @@ stdenv.mkDerivation rec {
     platforms = platforms.linux;
     maintainers = with maintainers; [ codgician ];
   };
-}
+})

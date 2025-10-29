@@ -12,18 +12,16 @@ let
   kernelDir = "${kernel.dev}/lib/modules/${kernelVersion}";
   kernelVersion = kernel.modDirVersion;
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation (finalAttrs: {
   pname = "kernel-mft";
   inherit (mlnx-ofed-src) src version;
 
-  unpackPhase = mkUnpackScript pname;
+  unpackPhase = mkUnpackScript finalAttrs.pname;
 
   nativeBuildInputs = kernel.moduleBuildDependencies;
 
-  patchPhase = ''
-    runHook prePatch
+  postPatch = ''
     patchShebangs .
-    runHook postPatch
   '';
 
   buildPhase =
@@ -61,4 +59,4 @@ stdenv.mkDerivation rec {
     platforms = platforms.linux;
     maintainers = with maintainers; [ codgician ];
   };
-}
+})

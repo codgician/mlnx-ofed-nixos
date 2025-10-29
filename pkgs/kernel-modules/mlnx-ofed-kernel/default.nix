@@ -9,7 +9,7 @@
   mlnx-ofed-src,
   writeShellScriptBin,
 
-  # Whether to copy source to $out/usr/src/ofa_kernel
+  # Whether to copy source to $out/src/ofa_kernel
   copySource ? true,
   ...
 }:
@@ -17,38 +17,38 @@ let
   kernelVersion = kernel.modDirVersion;
   kernelDir = "${kernel.dev}/lib/modules/${kernelVersion}";
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation (finalAttrs: {
   pname = "mlnx-ofed-kernel";
   inherit (mlnx-ofed-src) src version;
 
-  unpackPhase = mkUnpackScript pname;
+  unpackPhase = mkUnpackScript finalAttrs.pname;
 
   nativeBuildInputs =
     kernel.moduleBuildDependencies
     # Mock update-alternatives in post build script
     ++ lib.optional copySource (writeShellScriptBin "update-alternatives" "true");
 
-  patchPhase = ''
-    runHook prePatch
-
-    patchShebangs .
+  postPatch = ''
     substituteInPlace ./ofed_scripts/configure \
       --replace-warn '/bin/cp' 'cp' \
       --replace-warn '/bin/rm' 'rm'
     substituteInPlace ./ofed_scripts/makefile \
       --replace-warn '/bin/ls' 'ls' \
       --replace-warn '/bin/cp' 'cp' \
-      --replace-warn '/bin/rm' 'rm'
+      --replace-warn '/bin/rm' 'rm' \
+      --replace-fail 'data_dir = /usr/share/mlnx_ofed' 'data_dir = /share/mlnx_ofed' \
+      --replace-fail '$(INSTALL_MOD_PATH)/usr' '$(INSTALL_MOD_PATH)/'
   ''
   + lib.optionalString copySource ''
     # Patch post build script so source could be copied
     # this will be needed for building other mlnx kernel modules
     substituteInPlace ./ofed_scripts/dkms_ofed_post_build.sh \
-      --replace-fail '/usr/src/ofa_kernel' '$out/usr/src/ofa_kernel' \
+      --replace-fail '/usr/src/ofa_kernel' '$out/src/ofa_kernel' \
       --replace-warn '/bin/cp' 'cp' \
       --replace-warn '/bin/rm' 'rm'
-
-    runHook postPatch
+  ''
+  + ''
+    patchShebangs .
   '';
 
   configureScript = "./configure";
@@ -69,7 +69,7 @@ stdenv.mkDerivation rec {
     "--with-linux-obj=${kernelDir}/build"
     "--modules-dir=${kernelDir}"
     "--kernel-version=${kernelVersion}"
-    "--prefix=$out/usr"
+    "--prefix=$out"
   ];
 
   # Paralellize configure phase
@@ -83,7 +83,7 @@ stdenv.mkDerivation rec {
 
   postBuild = lib.optionalString copySource ''
     # Run post build tasks
-    export ofa_build_src=$out/usr/src/ofa_kernel/${kernelVersion}
+    export ofa_build_src=$out/src/ofa_kernel/${kernelVersion}
     ./ofed_scripts/dkms_ofed_post_build.sh
   '';
 
@@ -94,4 +94,4 @@ stdenv.mkDerivation rec {
     platforms = platforms.linux;
     maintainers = with maintainers; [ codgician ];
   };
-}
+})
