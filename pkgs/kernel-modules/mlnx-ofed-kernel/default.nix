@@ -89,7 +89,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   installFlags = kernelModuleInstallFlags;
 
-  meta = with pkgs.lib; {
+  meta = with lib; {
     description = "Mellanox mlnx-ofed driver kernel module";
     platforms = platforms.linux;
     maintainers = with maintainers; [ codgician ];

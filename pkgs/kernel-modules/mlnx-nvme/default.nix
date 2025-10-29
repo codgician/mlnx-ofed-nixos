@@ -47,7 +47,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   installFlags = kernelModuleInstallFlags;
 
-  meta = with pkgs.lib; {
+  meta = with lib; {
     description = "Mellanox virtiofs kernel module";
     platforms = platforms.linux;
     maintainers = with maintainers; [ codgician ];

@@ -54,7 +54,7 @@ stdenv.mkDerivation (finalAttrs: {
     cp ./misc_drivers/bf3_livefish/bf3_livefish.ko $install_dir
   '';
 
-  meta = with pkgs.lib; {
+  meta = with lib; {
     description = "Mellanox kernel-mft module";
     platforms = platforms.linux;
     maintainers = with maintainers; [ codgician ];
