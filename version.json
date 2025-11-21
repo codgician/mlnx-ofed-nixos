@@ -1,5 +1,5 @@
 {
-  "version": "25.07-0.9.7.0",
-  "url": "https://linux.mellanox.com/public/repo/doca/3.1.0-4.12.0-13720/SOURCES/mlnx_ofed/MLNX_OFED_SRC-debian-25.07-0.9.7.0.tgz",
-  "sha256": "sha256-zqu2sjf5Rg9BDx4DjIPMEkOJ2XzUNKgEUruTv+bddss="
+  "version": "25.10-1.2.8.0",
+  "url": "https://linux.mellanox.com/public/repo/doca/3.2.0-4.13.0-13799/SOURCES/mlnx_ofed/MLNX_OFED_SRC-debian-25.10-1.2.8.0.tgz",
+  "sha256": "sha256-gS9ghNoAbpWXlvXCzf2//4lVzl4g6gPCSTfU3dSbw74="
 }

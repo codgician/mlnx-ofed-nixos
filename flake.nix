@@ -24,6 +24,19 @@ rec {
       ];
       forAllSystems = f: lib.genAttrs systems (system: f system);
       mkPkgs = system: import nixpkgs { inherit system; };
+
+      mkLinuxPackages =
+        version: excluded:
+        forAllSystems (
+          system:
+          let
+            pkgs = mkPkgs system;
+            kernelPackages = pkgs."linuxPackages_${version}";
+          in
+          lib.removeAttrs ((import ./pkgs { inherit pkgs; }).mkKernelModules {
+            inherit (kernelPackages) kernel kernelModuleMakeFlags;
+          }) excluded
+        );
     in
     {
       # Overlays
@@ -63,33 +76,10 @@ rec {
       packages = forAllSystems (system: (import ./pkgs { pkgs = mkPkgs system; }).packages);
 
       # Kernel packages
-      linuxPackages_6_1 = forAllSystems (
-        system:
-        let
-          pkgs = mkPkgs system;
-        in
-        lib.removeAttrs ((import ./pkgs { inherit pkgs; }).mkKernelModules {
-          inherit (pkgs.linuxPackages_6_1) kernel kernelModuleMakeFlags;
-        }) [ "virtiofs" ] # remove unsupported kernel modules for 6.1
-      );
-      linuxPackages_6_6 = forAllSystems (
-        system:
-        let
-          pkgs = mkPkgs system;
-        in
-        lib.removeAttrs ((import ./pkgs { inherit pkgs; }).mkKernelModules {
-          inherit (pkgs.linuxPackages_6_6) kernel kernelModuleMakeFlags;
-        }) [ "virtiofs" ] # remove unsupported kernel modules for 6.6
-      );
-      linuxPackages_6_12 = forAllSystems (
-        system:
-        let
-          pkgs = mkPkgs system;
-        in
-        (import ./pkgs { inherit pkgs; }).mkKernelModules {
-          inherit (pkgs.linuxPackages_6_12) kernel kernelModuleMakeFlags;
-        }
-      );
+      linuxPackages_6_1 = mkLinuxPackages "6_1" [ "virtiofs" ];
+      linuxPackages_6_6 = mkLinuxPackages "6_6" [ "virtiofs" ];
+      linuxPackages_6_12 = mkLinuxPackages "6_12" [ ];
+      linuxPackages_latest = mkLinuxPackages "latest" [ ];
 
       # Text formatters
       formatter = forAllSystems (
