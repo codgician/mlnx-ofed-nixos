@@ -10,6 +10,8 @@ A small subset of Mellanox OFED packages ported to NixOS.
 
 This project is experimental and may stay experimental for a long time. Not all packages are fully tested, because I don't have the hardware to validate some of the scenarios like InfiniBand. Any help or suggestions are welcomed.
 
+Custom patches may be applied for kernel version compatibility.
+
 ## Binary cache
 
 - Address: `https://mlnx-ofed-nixos.cachix.org`

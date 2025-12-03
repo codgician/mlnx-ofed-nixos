@@ -15,6 +15,11 @@
 let
   kernelVersion = kernel.modDirVersion;
   kernelDir = "${kernel.dev}/lib/modules/${kernelVersion}";
+
+  # Apply ktls patch for required kernel versions
+  # This is affected by versions that have upstream commit 34892cfec0c2d96787c4be7bda0d5f18d7dacf85
+  applyKtlsPatch = (lib.versionAtLeast kernelVersion "6.12.60" && lib.versionOlder kernelVersion "6.13")
+    || (lib.versionAtLeast kernelVersion "6.17.10");
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "mlnx-ofed-kernel";
@@ -22,12 +27,8 @@ stdenv.mkDerivation (finalAttrs: {
 
   unpackPhase = mkUnpackScript finalAttrs.pname;
 
-  nativeBuildInputs =
-    kernel.moduleBuildDependencies
-    # Mock update-alternatives in post build script
-    ++ lib.optional copySource (writeShellScriptBin "update-alternatives" "true");
-
   postPatch = ''
+    ${lib.optionalString applyKtlsPatch "cp ${./0375-fix-ktls_rx.c.patch} ./backports/"}
     substituteInPlace ./ofed_scripts/configure \
       --replace-warn '/bin/cp' 'cp' \
       --replace-warn '/bin/rm' 'rm'
@@ -49,6 +50,11 @@ stdenv.mkDerivation (finalAttrs: {
   + ''
     patchShebangs .
   '';
+
+  nativeBuildInputs =
+    kernel.moduleBuildDependencies
+    # Mock update-alternatives in post build script
+    ++ lib.optional copySource (writeShellScriptBin "update-alternatives" "true");
 
   configureScript = "./configure";
 

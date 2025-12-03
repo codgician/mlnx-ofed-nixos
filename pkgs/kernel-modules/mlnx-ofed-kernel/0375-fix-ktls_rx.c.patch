@@ -1,0 +1,26 @@
+diff --git a/drivers/net/ethernet/mellanox/mlx5/core/en_accel/ktls_rx.c b/drivers/net/ethernet/mellanox/mlx5/core/en_accel/ktls_rx.c
+index 1234567..89abcdef 100644
+--- a/drivers/net/ethernet/mellanox/mlx5/core/en_accel/ktls_rx.c
++++ b/drivers/net/ethernet/mellanox/mlx5/core/en_accel/ktls_rx.c
+@@ -464,5 +464,8 @@ void mlx5e_ktls_handle_get_psv_completion(struct mlx5e_icosq_wqe_info *wi,
+ 	hw_seq = MLX5_GET(tls_progress_params, ctx, hw_resync_tcp_sn);
+-	tls_offload_rx_resync_async_request_end(priv_rx->sk, cpu_to_be32(hw_seq));
++	{
++		struct tls_offload_context_rx *rx_ctx = tls_offload_ctx_rx(tls_get_ctx(priv_rx->sk));
++		tls_offload_rx_resync_async_request_end(rx_ctx->resync_async, cpu_to_be32(hw_seq));
++	}
+ 	priv_rx->rq_stats->tls_resync_req_end++;
+ out:
+ 	mlx5e_ktls_priv_rx_put(priv_rx);
+@@ -560,6 +563,9 @@ static void resync_update_sn(struct mlx5e_rq *rq, struct sk_buff *skb)
+ 	seq = th->seq;
+ 	datalen = skb->len - depth;
+-	tls_offload_rx_resync_async_request_start(sk, seq, datalen);
++	{
++		struct tls_offload_resync_async *resync_async = tls_offload_ctx_rx(tls_get_ctx(sk))->resync_async;
++		tls_offload_rx_resync_async_request_start(resync_async, seq, datalen);
++	}
+ 	rq->stats->tls_resync_req_start++;
+ 
+ unref:
+
