@@ -79,7 +79,6 @@ rec {
       linuxPackages_6_1 = mkLinuxPackages "6_1" [ "virtiofs" ];
       linuxPackages_6_6 = mkLinuxPackages "6_6" [ "virtiofs" ];
       linuxPackages_6_12 = mkLinuxPackages "6_12" [ ];
-      linuxPackages_6_17 = mkLinuxPackages "6_17" [ ];
 
       # Text formatters
       formatter = forAllSystems (
