@@ -26,7 +26,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   nativeBuildInputs = kernel.moduleBuildDependencies;
 
-  patchPhase = ''
+  postPatch = ''
     substituteInPlace ./makefile \
       --replace-fail '/bin/ls' 'ls' \
       --replace-fail '/bin/bash' '${lib.getExe bash}'
