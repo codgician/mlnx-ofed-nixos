@@ -24,16 +24,24 @@ stdenv.mkDerivation (finalAttrs: {
   ];
 
   postPatch = ''
-    substituteInPlace sbin/* \
-      --replace-warn '/bin/ls' 'ls' \
-      --replace-warn '/bin/systemctl' 'systemctl' \
-      --replace-warn '/sbin/sysctl' 'sysctl'
+    substituteInPlace sbin/common_irq_affinity.sh \
+      --replace-fail '/bin/ls' 'ls'
 
-    substituteInPlace tsbin/* \
-      --replace-warn '/bin/ls' 'ls' \
-      --replace-warn '/bin/rm' 'rm' \
-      --replace-warn '/usr/bin/bash' '/usr/bin/env bash' \
-      --replace-warn '/bin/bash' 'bash' 
+    substituteInPlace sbin/mlnx_affinity \
+      --replace-fail '/bin/systemctl' 'systemctl' \
+      --replace-fail '/sbin/chkconfig' 'chkconfig'
+
+    substituteInPlace sbin/compat_gid_gen \
+      --replace-fail '/bin/echo' 'echo'
+
+    substituteInPlace tsbin/mlnx_bf_configure \
+      --replace-fail '/bin/ls' 'ls'
+
+    substituteInPlace tsbin/sysctl_perf_tuning \
+      --replace-fail '/bin/rm' 'rm' \
+      --replace-fail '/sbin/sysctl' 'sysctl'
+
+    patchShebangs .
   '';
 
   enableParallelBuilding = true;
