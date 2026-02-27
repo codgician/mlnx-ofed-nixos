@@ -28,8 +28,8 @@ stdenv.mkDerivation (finalAttrs: {
 
   postPatch = ''
     substituteInPlace ./makefile \
-      --replace-warn '/bin/ls' 'ls' \
-      --replace-warn '/bin/bash' '${lib.getExe bash}'
+      --replace-fail '/bin/ls' 'ls' \
+      --replace-fail '/bin/bash' '${lib.getExe bash}'
     patchShebangs .
   '';
 
@@ -40,7 +40,7 @@ stdenv.mkDerivation (finalAttrs: {
   env.NIX_CFLAGS_COMPILE = lib.optionalString (stdenv.hostPlatform.isAarch64) "-Wno-error=incompatible-pointer-types";
 
   makeFlags = kernelModuleMakeFlags ++ [
-    "OFA_DIR=${mlnxOfedKernel}/src/ofa_kernel"
+    "OFA_DIR=${mlnxOfedKernel}/src/ofa_kernel/${kernelVersion}"
     "K_BUILD=${kernelDir}/build"
   ];
 

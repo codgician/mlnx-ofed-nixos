@@ -25,15 +25,15 @@ stdenv.mkDerivation (finalAttrs: {
 
   postPatch = ''
     substituteInPlace sbin/* \
-      --replace-warn '/bin/ls' 'ls' \
-      --replace-warn '/bin/systemctl' 'systemctl' \
-      --replace-warn '/sbin/sysctl' 'sysctl'
+      --replace-fail '/bin/ls' 'ls' \
+      --replace-fail '/bin/systemctl' 'systemctl' \
+      --replace-fail '/sbin/sysctl' 'sysctl'
 
     substituteInPlace tsbin/* \
-      --replace-warn '/bin/ls' 'ls' \
-      --replace-warn '/bin/rm' 'rm' \
-      --replace-warn '/usr/bin/bash' '/usr/bin/env bash' \
-      --replace-warn '/bin/bash' 'bash' 
+      --replace-fail '/bin/ls' 'ls' \
+      --replace-fail '/bin/rm' 'rm' \
+      --replace-fail '/usr/bin/bash' '/usr/bin/env bash' \
+      --replace-fail '/bin/bash' 'bash' 
   '';
 
   enableParallelBuilding = true;

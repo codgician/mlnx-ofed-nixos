@@ -24,12 +24,12 @@ stdenv.mkDerivation (finalAttrs: {
 
   postPatch = ''
     substituteInPlace ./ofed_scripts/configure \
-      --replace-warn '/bin/cp' 'cp' \
-      --replace-warn '/bin/rm' 'rm'
+      --replace-fail '/bin/cp' 'cp' \
+      --replace-fail '/bin/rm' 'rm'
     substituteInPlace ./ofed_scripts/makefile \
-      --replace-warn '/bin/ls' 'ls' \
-      --replace-warn '/bin/cp' 'cp' \
-      --replace-warn '/bin/rm' 'rm' \
+      --replace-fail '/bin/ls' 'ls' \
+      --replace-fail '/bin/cp' 'cp' \
+      --replace-fail '/bin/rm' 'rm' \
       --replace-fail 'data_dir = /usr/share/mlnx_ofed' 'data_dir = /share/mlnx_ofed' \
       --replace-fail '$(INSTALL_MOD_PATH)/usr' '$(INSTALL_MOD_PATH)/'
   ''
@@ -38,8 +38,8 @@ stdenv.mkDerivation (finalAttrs: {
     # this will be needed for building other mlnx kernel modules
     substituteInPlace ./ofed_scripts/dkms_ofed_post_build.sh \
       --replace-fail '/usr/src/ofa_kernel' '$out/src/ofa_kernel' \
-      --replace-warn '/bin/cp' 'cp' \
-      --replace-warn '/bin/rm' 'rm'
+      --replace-fail '/bin/cp' 'cp' \
+      --replace-fail '/bin/rm' 'rm'
   ''
   + ''
     patchShebangs .
