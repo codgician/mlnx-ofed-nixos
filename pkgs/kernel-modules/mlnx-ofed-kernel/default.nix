@@ -88,6 +88,20 @@ stdenv.mkDerivation (finalAttrs: {
 
   installFlags = kernelModuleInstallFlags;
 
+  postInstall = ''
+    # Add depmod.d overrides to prioritize OFED modules over inbox drivers
+    # This is picked up by depmod during NixOS aggregateModules build
+    mkdir -p $out/etc/depmod.d
+
+    # Dynamically generate overrides for modules that were actually built
+    echo "# Override inbox Mellanox drivers with OFED versions" > $out/etc/depmod.d/mlnx-ofed.conf
+    for mod in $(find $out/lib/modules -name '*.ko*' -type f); do
+      modname=$(basename "$mod" | sed 's/\.ko.*$//')
+      modpath=$(dirname "$mod" | sed "s|$out/lib/modules/[^/]*/||")
+      echo "override $modname * $modpath" >> $out/etc/depmod.d/mlnx-ofed.conf
+    done
+  '';
+
   meta = with lib; {
     description = "Mellanox mlnx-ofed driver kernel module";
     platforms = platforms.linux;
