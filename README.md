@@ -4,11 +4,11 @@
 ![license](https://img.shields.io/github/license/codgician/mlnx-ofed-nixos)
 ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcodgician%2Fmlnx-ofed-nixos%2Frefs%2Fheads%2Fmain%2Fversion.json&query=%24.version&label=version)
 
-A small subset of Mellanox OFED packages ported to NixOS.
+A subset of [DOCA-OFED](https://docs.nvidia.com/doca/sdk/doca-profiles/index.html) (previously known as Mellanox OFED) packages ported to NixOS.
 
 ## Warning
 
-This project is experimental and may stay experimental for a long time. Not all packages are fully tested, because I don't have the hardware to validate some of the scenarios like InfiniBand. Any help or suggestions are welcomed.
+This project is experimental and may stay experimental for a long time. Not all packages are fully tested, because I don't have the hardware to validate some of the scenarios (like InfiniBand and BlueField). Any help or suggestions are welcomed.
 
 Custom patches may be applied for kernel version compatibility.
 
