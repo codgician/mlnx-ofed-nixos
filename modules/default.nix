@@ -31,7 +31,7 @@ in
         type = types.package;
         default = config.boot.kernelPackages.mlnx-ofed-kernel;
         defaultText = "config.boot.kernelPackages.mlnx-ofed-kernel";
-        example = lib.literalExpressionliteralExpression "config.boot.kernelPackages.mlnx-ofed-kernel";
+        example = lib.literalExpression "config.boot.kernelPackages.mlnx-ofed-kernel";
         description = ''
           Defines which package to use for kernel module mlnx-ofed-kernel.
         '';
@@ -44,7 +44,7 @@ in
           type = types.package;
           default = config.boot.kernelPackages.kernel-mft;
           defaultText = "config.boot.kernelPackages.kernel-mft";
-          example = lib.literalExpressionliteralExpression "config.boot.kernelPackages.kernel-mft";
+          example = lib.literalExpression "config.boot.kernelPackages.kernel-mft";
           description = ''
             Defines which package to use for kernel module kernel-mft.
           '';
@@ -58,7 +58,7 @@ in
           type = types.package;
           default = config.boot.kernelPackages.mlnx-nfsrdma;
           defaultText = "config.boot.kernelPackages.mlnx-nfsrdma";
-          example = lib.literalExpressionliteralExpression "config.boot.kernelPackages.nfsrdma";
+          example = lib.literalExpression "config.boot.kernelPackages.nfsrdma";
           description = ''
             Defines which package to use for kernel module nfsrdma.
           '';
@@ -72,7 +72,7 @@ in
           type = types.package;
           default = config.boot.kernelPackages.mlnx-nvme;
           defaultText = "config.boot.kernelPackages.mlnx-nvme";
-          example = lib.literalExpressionliteralExpression "config.boot.kernelPackages.mlnx-nvme";
+          example = lib.literalExpression "config.boot.kernelPackages.mlnx-nvme";
           description = ''
             Defines which package to use for kernel module mlnx-nvme.
           '';
@@ -86,7 +86,7 @@ in
           type = types.package;
           default = config.boot.kernelPackages.mlnx-nvme;
           defaultText = "config.boot.kernelPackages.virtiofs";
-          example = lib.literalExpressionliteralExpression "config.boot.kernelPackages.virtiofs";
+          example = lib.literalExpression "config.boot.kernelPackages.virtiofs";
           description = ''
             Defines which package to use for kernel module DOCA SNAP virtiofs.
           '';
