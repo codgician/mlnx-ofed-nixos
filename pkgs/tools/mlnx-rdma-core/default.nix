@@ -12,6 +12,11 @@ rdma-core.overrideAttrs (oldAttrs: {
 
   unpackPhase = mkUnpackScript "rdma-core";
 
+  # Remove patches that may not apply to MLNX version
+  patches = [ ];
+
+  cmakeFlags = builtins.filter (flag: !(lib.hasPrefix "-DSYSUSERS_DIR=" flag)) oldAttrs.cmakeFlags;
+
   meta =
     with lib;
     oldAttrs.meta
