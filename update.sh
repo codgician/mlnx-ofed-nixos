@@ -32,12 +32,9 @@ EOF
 # Extract links from HTML
 extract_links() { grep -o 'href="[^"]*"' | cut -d'"' -f2; }
 
-# Check if directory is a versioned release (not a pointer)
-is_release() { 
-    case "$1" in
-        [0-9]*.[0-9]*.[0-9]*-*/) return 0 ;;
-        *) return 1 ;;
-    esac
+# Check if directory is a canonical or build-qualified release.
+is_release() {
+    [[ "$1" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[^/]*)?/$ ]]
 }
 
 # Find the MLNX_OFED directory (case insensitive)
@@ -62,8 +59,9 @@ find_package() {
 find_latest() {
     log "Finding latest version"
     
+    # Prefer build-qualified directories when the release number is equal.
     local dirs
-    dirs=$(curl -s "$BASE_URL" | extract_links | grep '/$' | sort -Vr)
+    dirs=$(curl -s "$BASE_URL" | extract_links | grep '/$' | sort -t. -k1,1nr -k2,2nr -k3,3nr -k3.2,3.2 -k3.3Vr)
     
     local dir
     for dir in $dirs; do
