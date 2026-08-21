@@ -76,6 +76,16 @@ stdenv.mkDerivation (finalAttrs: {
     appendToVar configureFlags "-j$NIX_BUILD_CORES"
   '';
 
+  # Linux 6.18.45 changed xsk_tx_metadata_request() to accept the buffer pool
+  # and metadata by reference, while OFED still uses the old signature.
+  # OFED applies its backports during configure, so patch the resulting tree.
+  postConfigure =
+    lib.optionalString
+      (lib.versionAtLeast kernelVersion "6.18.45" && lib.versionOlder kernelVersion "6.19")
+      ''
+        patch -p1 < ${./xsk-tx-metadata-request.patch}
+      '';
+
   enableParallelBuilding = true;
 
   makeFlags = kernelModuleMakeFlags;
