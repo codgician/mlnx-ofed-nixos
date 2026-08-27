@@ -1,5 +1,7 @@
 {
   lib,
+  autoconf,
+  automake,
   stdenv,
   kernel,
   kernelModuleMakeFlags,
@@ -47,6 +49,10 @@ stdenv.mkDerivation (finalAttrs: {
 
   nativeBuildInputs =
     kernel.moduleBuildDependencies
+    ++ [
+      autoconf
+      automake
+    ]
     # Mock update-alternatives in post build script
     ++ lib.optional copySource (writeShellScriptBin "update-alternatives" "true");
 
@@ -68,7 +74,7 @@ stdenv.mkDerivation (finalAttrs: {
     "--with-linux-obj=${kernelDir}/build"
     "--modules-dir=${kernelDir}"
     "--kernel-version=${kernelVersion}"
-    "--prefix=$out"
+    "--prefix=/"
   ];
 
   # Paralellize configure phase
@@ -76,14 +82,13 @@ stdenv.mkDerivation (finalAttrs: {
     appendToVar configureFlags "-j$NIX_BUILD_CORES"
   '';
 
-  # Linux 6.18.45 changed xsk_tx_metadata_request() to accept the buffer pool
-  # and metadata by reference, while OFED still uses the old signature.
-  # OFED applies its backports during configure, so patch the resulting tree.
+  # Linux 6.18.45 backported ndo_default_qcfg without the later
+  # ndo_validate_qcfg and supported_params queue-management members.
   postConfigure =
     lib.optionalString
       (lib.versionAtLeast kernelVersion "6.18.45" && lib.versionOlder kernelVersion "6.19")
       ''
-        patch -p1 < ${./xsk-tx-metadata-request.patch}
+        patch -p1 < ${./netdev-qcfg-ops.patch}
       '';
 
   enableParallelBuilding = true;
