@@ -15,7 +15,9 @@ rdma-core.overrideAttrs (oldAttrs: {
   # Remove patches that may not apply to MLNX version
   patches = [ ];
 
-  cmakeFlags = builtins.filter (flag: !(lib.hasPrefix "-DSYSUSERS_DIR=" flag)) oldAttrs.cmakeFlags;
+  cmakeFlags =
+    builtins.filter (flag: !(lib.hasPrefix "-DSYSUSERS_DIR=" flag)) oldAttrs.cmakeFlags
+    ++ [ "-DSYSUSERS_DIR=${builtins.placeholder "out"}/lib/sysusers.d" ];
 
   meta =
     with lib;

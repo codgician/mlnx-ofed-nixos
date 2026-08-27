@@ -18,13 +18,13 @@ let
 
   # Make unpack script for inner packages
   mkUnpackScript = pname: ''
-    pattern="${pname}_*.orig.tar.gz"
+    pattern="${pname}_*.orig.tar.*"
     file=$(find ${mlnx-ofed-src}/SOURCES -name "$pattern" | head -n1)
     if [ -z "$file" ]; then
       echo "Error: Could not find $pattern in SOURCES"
       exit 1
     fi
-    tar --strip-components 1 -xzf "$file"
+    tar --transform='s,^\./,,' --strip-components 1 -xf "$file"
   '';
 
   # Build packages from a directory, allowing cross-package references
