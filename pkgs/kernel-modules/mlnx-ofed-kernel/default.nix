@@ -82,6 +82,8 @@ stdenv.mkDerivation (finalAttrs: {
     appendToVar configureFlags "-j$NIX_BUILD_CORES"
   '';
 
+  # Linux 6.18.45 backported ndo_default_qcfg without the later
+  # ndo_validate_qcfg and supported_params queue-management members.
   postConfigure =
     lib.optionalString
       (lib.versionAtLeast kernelVersion "6.18.45" && lib.versionOlder kernelVersion "6.19")
