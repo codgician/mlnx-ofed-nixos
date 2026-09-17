@@ -1,0 +1,8 @@
+diff --git a/drivers/net/ethernet/mellanox/mlx5/core/en/xsk/tx.c b/drivers/net/ethernet/mellanox/mlx5/core/en/xsk/tx.c
+--- a/drivers/net/ethernet/mellanox/mlx5/core/en/xsk/tx.c
++++ b/drivers/net/ethernet/mellanox/mlx5/core/en/xsk/tx.c
+@@ -121,3 +121,3 @@ bool mlx5e_xsk_tx(struct mlx5e_xdpsq *sq, unsigned int budget)
+ #ifdef HAVE_XSK_TX_METADATA_OPS
+-		meta = xsk_buff_get_metadata(pool, desc.addr);
++		meta = xsk_buff_get_metadata(pool, desc.addr, desc.options);
+ #endif

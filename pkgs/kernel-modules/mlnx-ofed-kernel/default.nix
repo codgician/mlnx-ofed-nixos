@@ -82,14 +82,22 @@ stdenv.mkDerivation (finalAttrs: {
     appendToVar configureFlags "-j$NIX_BUILD_CORES"
   '';
 
-  # Linux 6.18.45 backported ndo_default_qcfg without the later
-  # ndo_validate_qcfg and supported_params queue-management members.
+  # Linux 6.18.45 backported ndo_default_qcfg and supported_params without
+  # the later ndo_validate_qcfg queue-management member.
   postConfigure =
     lib.optionalString
       (lib.versionAtLeast kernelVersion "6.18.45" && lib.versionOlder kernelVersion "6.19")
       ''
         patch -p1 < ${./netdev-qcfg-ops.patch}
-      '';
+      ''
+    # Linux 6.18.52 backported a6e4b9a6deb9 ("xsk: honor XDP_TX_METADATA
+    # in zero-copy path"), adding descriptor options to the metadata helper.
+    +
+      lib.optionalString
+        (lib.versionAtLeast kernelVersion "6.18.52" && lib.versionOlder kernelVersion "6.19")
+        ''
+          patch -p1 < ${./xsk-tx-metadata.patch}
+        '';
 
   enableParallelBuilding = true;
 
