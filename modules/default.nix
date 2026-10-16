@@ -84,7 +84,7 @@ in
 
         package = lib.mkOption {
           type = types.package;
-          default = config.boot.kernelPackages.mlnx-nvme;
+          default = config.boot.kernelPackages.virtiofs;
           defaultText = "config.boot.kernelPackages.virtiofs";
           example = lib.literalExpression "config.boot.kernelPackages.virtiofs";
           description = ''
