@@ -90,11 +90,15 @@ stdenv.mkDerivation (finalAttrs: {
       ''
         patch -p1 < ${./netdev-qcfg-ops.patch}
       ''
-    # Linux 6.18.52 backported a6e4b9a6deb9 ("xsk: honor XDP_TX_METADATA
-    # in zero-copy path"), adding descriptor options to the metadata helper.
+    # Linux 6.12.114 and 6.18.52 backported a6e4b9a6deb9 ("xsk: honor
+    # XDP_TX_METADATA in zero-copy path"), adding descriptor options to the
+    # metadata helper.
     +
       lib.optionalString
-        (lib.versionAtLeast kernelVersion "6.18.52" && lib.versionOlder kernelVersion "6.19")
+        (
+          (lib.versionAtLeast kernelVersion "6.12.114" && lib.versionOlder kernelVersion "6.13")
+          || (lib.versionAtLeast kernelVersion "6.18.52" && lib.versionOlder kernelVersion "6.19")
+        )
         ''
           patch -p1 < ${./xsk-tx-metadata.patch}
         '';

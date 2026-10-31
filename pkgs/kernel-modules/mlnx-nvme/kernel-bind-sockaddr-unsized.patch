@@ -1,0 +1,22 @@
+diff --git a/host/tcp.c b/host/tcp.c
+index 96053c9..a7a120b 100644
+--- a/host/tcp.c
++++ b/host/tcp.c
+@@ -2134,5 +2134,5 @@ static int nvme_tcp_alloc_queue(struct nvme_ctrl *nctrl, int qid,
+ #else
+ /* Older kernels: sockaddr parameter */
+-			(struct sockaddr *)&ctrl->src_addr,
++			(struct sockaddr_unsized *)&ctrl->src_addr,
+ #endif
+ 			sizeof(ctrl->src_addr));
+diff --git a/target/tcp.c b/target/tcp.c
+index ba96f58..6ab4cb6 100644
+--- a/target/tcp.c
++++ b/target/tcp.c
+@@ -2232,5 +2232,5 @@ static int nvmet_tcp_add_port(struct nvmet_port *nport)
+ #else
+ /* Older kernels: sockaddr parameter */
+-			(struct sockaddr *)&port->addr,
++			(struct sockaddr_unsized *)&port->addr,
+ #endif
+ 			sizeof(port->addr));

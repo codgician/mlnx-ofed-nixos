@@ -31,7 +31,16 @@ stdenv.mkDerivation (finalAttrs: {
       --replace-fail '/bin/ls' 'ls' \
       --replace-fail '/bin/bash' '${lib.getExe bash}'
     patchShebangs .
-  '';
+  ''
+  # Linux 6.18.57 backported the sockaddr_unsized kernel_bind() signature but
+  # kept kernel_connect() on sockaddr, so the HAVE_SOCKADDR_UNSIZED compat probe
+  # (which requires both) misses it.
+  +
+    lib.optionalString
+      (lib.versionAtLeast kernelVersion "6.18.57" && lib.versionOlder kernelVersion "6.19")
+      ''
+        patch -p1 < ${./kernel-bind-sockaddr-unsized.patch}
+      '';
 
   enableParallelBuilding = true;
 
