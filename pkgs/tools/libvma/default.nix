@@ -1,6 +1,6 @@
 {
   lib,
-  stdenv,
+  gcc15Stdenv,
   mkUnpackScript,
   mlnx-ofed-src,
   mlnx-rdma-core,
@@ -10,7 +10,9 @@
   ...
 }:
 
-stdenv.mkDerivation {
+# libvma hardcodes -Werror and its configure probes rely on it; GCC 16 introduces
+# new diagnostics (non-c-typedef-for-linkage, unused-but-set-variable) that break the build.
+gcc15Stdenv.mkDerivation {
   pname = "libvma";
   inherit (mlnx-ofed-src) src version;
 
@@ -40,7 +42,10 @@ stdenv.mkDerivation {
       Applications can use VMA transparently without code changes via LD_PRELOAD.
     '';
     homepage = "https://github.com/Mellanox/libvma";
-    license = with licenses; [ gpl2Only bsd2 ];
+    license = with licenses; [
+      gpl2Only
+      bsd2
+    ];
     platforms = platforms.linux;
     maintainers = with maintainers; [ codgician ];
   };
